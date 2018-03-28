@@ -1,7 +1,44 @@
 (ns clj-cayley-dickson.core-test
   (:require [clojure.test :refer :all]
-            [clj-cayley-dickson.core :refer :all]))
+            [clj-cayley-dickson.core :refer :all]
+            [clojure.pprint :refer :all]))
 
+
+(println "order 2:" (complex2 1 1))
+
+(println
+  "times order 2:")
+
+(pprint
+  (times (complex2 1 1)
+         (complex2 1 1)))
+
+(println
+  "order 4:"
+  (complex4 1 1 1 1))
+
+(println
+  "times order 4:")
+
+(pprint
+  (times (complex4 1 1 1 1)
+         (complex4 1 1 1 1)))
+
+(println "order 8: " (complex8 1 1 1 1 1 1 1 1))
+
+(println
+  "times order 8:")
+(pprint
+  (times (complex8 1 1 1 1 1 1 1 1)
+         (complex8 1 1 1 1 1 1 1 1)))
+
+(println "inv: " (inv (complex4 1 1 1 1)))
+
+(println "norm: " (norm (complex4 1 1 1 1)))
+
+(println "mag: " (mag (complex4 1 1 1 1)))
+
+(println "scale: " (scale (complex4 1 1 1 1) 0.5))
 
 (deftest cayley-dickson-constructions-test
   (testing "Commutivity holds for order <= 2"

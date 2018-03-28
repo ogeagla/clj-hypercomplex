@@ -1,5 +1,4 @@
 (ns clj-cayley-dickson.core
-  (:require [clojure.pprint :refer :all])
   (:gen-class))
 
 ; inspired by https://github.com/hamiltron/py-cayleydickson/blob/master/cayleydickson.py
@@ -212,38 +211,11 @@
           (complex8 a b c d e f g h)
           (complex8 i j k l m n o p))))
 
-(println "order 2:" (complex2 1 1))
-
-(println
-  "times order 2:")
-
-(pprint
-  (times (complex2 1 1)
-         (complex2 1 1)))
-
-(println
-  "order 4:"
-  (complex4 1 1 1 1))
-
-(println
-  "times order 4:")
-
-(pprint
-  (times (complex4 1 1 1 1)
-         (complex4 1 1 1 1)))
-
-(println "order 8: " (complex8 1 1 1 1 1 1 1 1))
-
-(println
-  "times order 8:")
-(pprint
-  (times (complex8 1 1 1 1 1 1 1 1)
-         (complex8 1 1 1 1 1 1 1 1)))
-
-(println "inv: " (inv (complex4 1 1 1 1)))
-
-(println "norm: " (norm (complex4 1 1 1 1)))
-
-(println "mag: " (mag (complex4 1 1 1 1)))
-
-(println "scale: " (scale (complex4 1 1 1 1) 0.5))
+; TODO lol "can't specify more than 20 parameters"
+#_(defn complex32 [a b c d e f g h
+                 i j k l m n o p
+                 q r s t u v w x
+                 y z aa bb cc dd ee ff]
+  (init (->Construction
+          (complex16 a b c d e f g h i j k l m n o p)
+          (complex16 q r s t u v w x y z aa bb cc dd ee ff))))
