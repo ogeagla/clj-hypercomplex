@@ -253,3 +253,16 @@
     (octonion
       {:a i :b j :c k :d l :e m :f n :g o :h p})))
 
+(defn trigdunion [{:keys
+                   [a b c d e f g h
+                    i j k l m n o p
+                    q r s t u v w x
+                    y z aa bb cc dd ee ff]
+                   :as
+                   params}]
+  (init-construction
+    (sedenion
+      {:a a :b b :c c :d d :e e :f f :g g :h h :i i :j j :k k :l l :m m :n n :o o :p p})
+    (sedenion
+      {:a q :b r :c s :d t :e u :f v :g w :h x :i y :j z :k aa :l bb :m cc :n dd :o ee :p ff})))
+
