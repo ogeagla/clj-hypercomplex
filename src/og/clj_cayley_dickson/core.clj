@@ -254,7 +254,7 @@
     (quaternion
       {:a e :b f :c g :d h})))
 
-(defn sedonion [{:keys
+(defn sedenion [{:keys
                  [a b c d
                   e f g h
                   i j k l
