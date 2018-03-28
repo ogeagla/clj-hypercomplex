@@ -192,30 +192,46 @@
              this)
       (inv other))))
 
-(defn complex2 [a b]
+(defn complex [{:keys
+                [a b]
+                :as
+                params}]
   (init (->Complex2 a b)))
 
-(defn complex4 [a b c d]
-  (init (->Construction
-          (complex2 a b)
-          (complex2 c d))))
+(defn quaternion [{:keys
+                   [a b c d]
+                   :as
+                   params}]
+  (init
+    (->Construction
+      (complex
+        {:a a :b b})
+      (complex
+        {:a c :b d}))))
 
-(defn complex8 [a b c d e f g h]
-  (init (->Construction
-          (complex4 a b c d)
-          (complex4 e f g h))))
+(defn octonion [{:keys
+                 [a b c d
+                  e f g h]
+                 :as
+                 params}]
+  (init
+    (->Construction
+      (quaternion
+        {:a a :b b :c c :d d})
+      (quaternion
+        {:a e :b f :c g :d h}))))
 
-(defn complex16 [a b c d e f g h
-                 i j k l m n o p]
-  (init (->Construction
-          (complex8 a b c d e f g h)
-          (complex8 i j k l m n o p))))
+(defn sedonion [{:keys
+                 [a b c d
+                  e f g h
+                  i j k l
+                  m n o p]
+                 :as
+                 params}]
+  (init
+    (->Construction
+      (octonion
+        {:a a :b b :c c :d d :e e :f f :g g :h h})
+      (octonion
+        {:a i :b j :c k :d l :e m :f n :g o :h p}))))
 
-; TODO lol "can't specify more than 20 parameters"
-#_(defn complex32 [a b c d e f g h
-                 i j k l m n o p
-                 q r s t u v w x
-                 y z aa bb cc dd ee ff]
-  (init (->Construction
-          (complex16 a b c d e f g h i j k l m n o p)
-          (complex16 q r s t u v w x y z aa bb cc dd ee ff))))

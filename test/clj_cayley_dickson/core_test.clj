@@ -4,84 +4,84 @@
             [clojure.pprint :refer :all]))
 
 
-(println "order 2:" (complex2 1 1))
-
-(println
-  "times order 2:")
-
-(pprint
-  (times (complex2 1 1)
-         (complex2 1 1)))
-
-(println
-  "order 4:"
-  (complex4 1 1 1 1))
-
-(println
-  "times order 4:")
-
-(pprint
-  (times (complex4 1 1 1 1)
-         (complex4 1 1 1 1)))
-
-(println "order 8: " (complex8 1 1 1 1 1 1 1 1))
-
-(println
-  "times order 8:")
-(pprint
-  (times (complex8 1 1 1 1 1 1 1 1)
-         (complex8 1 1 1 1 1 1 1 1)))
-
-(println "inv: " (inv (complex4 1 1 1 1)))
-
-(println "norm: " (norm (complex4 1 1 1 1)))
-
-(println "mag: " (mag (complex4 1 1 1 1)))
-
-(println "scale: " (scale (complex4 1 1 1 1) 0.5))
+;(println "order 2:" (complex2 1 1))
+;
+;(println
+;  "times order 2:")
+;
+;(pprint
+;  (times (complex2 1 1)
+;         (complex2 1 1)))
+;
+;(println
+;  "order 4:"
+;  (complex4 1 1 1 1))
+;
+;(println
+;  "times order 4:")
+;
+;(pprint
+;  (times (complex4 1 1 1 1)
+;         (complex4 1 1 1 1)))
+;
+;(println "order 8: " (complex8 1 1 1 1 1 1 1 1))
+;
+;(println
+;  "times order 8:")
+;(pprint
+;  (times (complex8 1 1 1 1 1 1 1 1)
+;         (complex8 1 1 1 1 1 1 1 1)))
+;
+;(println "inv: " (inv (complex4 1 1 1 1)))
+;
+;(println "norm: " (norm (complex4 1 1 1 1)))
+;
+;(println "mag: " (mag (complex4 1 1 1 1)))
+;
+;(println "scale: " (scale (complex4 1 1 1 1) 0.5))
 
 (deftest cayley-dickson-constructions-test
   (testing "Commutivity holds for order <= 2"
     (is
-      (= (times (complex2 1 2)
-                (complex2 3 4))
-         (times (complex2 3 4)
-                (complex2 1 2))))
+      (= (times (complex {:a 1 :b 2})
+                (complex {:a 3 :b 4}))
+         (times (complex {:a 3 :b 4})
+                (complex {:a 1 :b 2}))))
     (is
       (not
-        (= (times (complex4 1 2 3 4)
-                  (complex4 8 7 6 5))
-           (times (complex4 8 7 6 5)
-                  (complex4 1 2 3 4))))))
+        (= (times (quaternion {:a 1 :b 2 :c 3 :d 4})
+                  (quaternion {:a 8 :b 7 :c 6 :d 5}))
+           (times (quaternion {:a 8 :b 7 :c 6 :d 5})
+                  (quaternion {:a 1 :b 2 :c 3 :d 4}))))))
   (testing "Associativity holds for order <= 4"
     (is
       (= (times
-             (complex2 5 6)
-             (times (complex2 1 2)
-                    (complex2 3 4)))
-           (times
-             (times
-               (complex2 5 6)
-               (complex2 1 2))
-             (complex2 3 4))))
-    (is
-      (= (times
-           (complex4 1 2 3 4)
-           (times (complex4 8 7 6 5)
-                  (complex4 9 10 11 12)))
+           (complex {:a 5 :b 6})
+           (times (complex {:a 1 :b 2})
+                  (complex {:a 3 :b 4})))
          (times
            (times
-             (complex4 1 2 3 4)
-             (complex4 8 7 6 5))
-           (complex4 9 10 11 12))))
+             (complex {:a 5 :b 6})
+             (complex {:a 1 :b 2}))
+           (complex {:a 3 :b 4}))))
+    (is
+      (= (times
+           (quaternion {:a 1 :b 2 :c 3 :d 4})
+           (times (quaternion {:a 8 :b 7 :c 6 :d 5})
+                  (quaternion {:a 9 :b 10 :c 11 :d 12})))
+         (times
+           (times
+             (quaternion {:a 1 :b 2 :c 3 :d 4})
+             (quaternion {:a 8 :b 7 :c 6 :d 5}))
+           (quaternion {:a 9 :b 10 :c 11 :d 12}))))
     (is
       (not
         (= (times
-             (complex8 0 2 3 4 4 3 2 1)
-             (times (complex8 8 7 6 5 5 6 7 8)
-                    (complex8 9 10 11 13 12 11 10 9)))
+             (octonion {:a 0 :b 2 :c 3 :d 4 :e 4 :f 3 :g 2 :h 1})
+             (times (octonion {:a 8 :b 7 :c 6 :d 5 :e 5 :f 6 :g 7 :h 8})
+                    (octonion {:a 9 :b 10 :c 11 :d 13 :e 12 :f 11 :g 10 :h 9})))
            (times
              (times
-               (complex8 0 2 3 4 4 3 2 1)
-               (complex8 8 7 6 5 5 6 7 8))
-             (complex8 9 10 11 13 12 11 10 9)))))))
+               (octonion {:a 0 :b 2 :c 3 :d 4 :e 4 :f 3 :g 2 :h 1})
+               (octonion {:a 8 :b 7 :c 6 :d 5 :e 5 :f 6 :g 7 :h 8}))
+             (octonion {:a 9 :b 10 :c 11 :d 13 :e 12 :f 11 :g 10 :h 9})))))))
