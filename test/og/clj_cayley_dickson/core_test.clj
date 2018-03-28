@@ -3,8 +3,61 @@
             [og.clj-cayley-dickson.core :refer :all]
             [clojure.pprint :refer :all]))
 
+(defn fuzzy= [tolerance x y]
+  (let [diff (Math/abs (- x y))]
+    (< diff tolerance)))
+
+(defn quatfuzzy= [tolerance q1 q2]
+  (and (fuzzy= tolerance
+               (:a (:a q1))
+               (:a (:a q2)))
+       (fuzzy= tolerance
+               (:a (:b q1))
+               (:a (:b q2)))
+       (fuzzy= tolerance
+               (:b (:a q1))
+               (:b (:a q2)))
+       (fuzzy= tolerance
+               (:b (:b q1))
+               (:b (:b q2)))))
 
 (deftest cayley-dickson-constructions-test
+
+  (testing "Rotation"
+    (is (= (quaternion {:a 1.5 :b 1.5 :c 1.5 :d 1.5})
+           (rot (quaternion {:a 1.5 :b 1.5 :c 1.5 :d 1.5})
+                (quaternion {:a 2.5 :b 1.5 :c 1.5 :d 1.5}))))
+    (is (= (quaternion {:a 0.0 :b 1.5 :c 1.5 :d 1.5})
+           (rot (quaternion {:a 0.0 :b 1.5 :c 1.5 :d 1.5})
+                (quaternion {:a 2.5 :b 1.5 :c 1.5 :d 1.5}))))
+    (is (quatfuzzy=
+          0.00000001
+          (quaternion {:a 0.0
+                       :b (/
+                            (+ 10.0
+                               (* 4.0
+                                  (Math/sqrt 3.0)))
+                            8.0)
+                       :c (/
+                            (+ 1.0
+                               (* 2.0
+                                  (Math/sqrt 3.0)))
+                            8.0)
+                       :d (/
+                            (- 14.0
+                               (* 3.0
+                                  (Math/sqrt 3.0)))
+                            8.0)})
+          (rot (quaternion {:a 0.0
+                            :b 1.0
+                            :c -1.0
+                            :d 2.0})
+               (quaternion {:a (/ (Math/sqrt 3.0)
+                                  2.0)
+                            :b 0.0
+                            :c 0.25
+                            :d (/ (Math/sqrt 3.0)
+                                  4.0)})))))
 
   (testing "Scale"
     (is (= (complex {:a 0.1 :b 0.1})
