@@ -25,6 +25,50 @@
   (inv [this])
   (rot [this other]))
 
+
+(defn eq-order? [a b]
+  (and
+    (:order a)
+    (:order b)
+    (= (:order a) (:order b))))
+
+(defn- nion-ops-mag [this]
+  (->
+    this
+    norm
+    Math/sqrt))
+(defn- nion-ops-scale [this s]
+  (loop [new-this this
+         idx      (dec (:order this))]
+    (let [new-new-this (set-idx
+                         new-this
+                         idx
+                         (*
+                           s
+                           (get-idx new-this idx)))]
+      (if (pos? idx)
+        (recur new-new-this (dec idx))
+        new-new-this))))
+(defn- nion-ops-norm [this]
+  (loop [sum 0
+         idx (dec (:order this))]
+    (let [new-sum (+
+                    sum
+                    (* (get-idx this idx)
+                       (get-idx this idx)))]
+      (if (pos? idx)
+        (recur new-sum (dec idx))
+        new-sum))))
+(defn- nion-ops-inv [this]
+  (scale (c this)
+         (/ 1.0
+            (norm this))))
+(defn- nion-ops-rot [this other]
+  (times
+    (times other
+           this)
+    (inv other)))
+
 (defrecord Complex2 [a b]
   Nion
   (init [this]
@@ -76,47 +120,15 @@
         (assoc this :b new-val))))
   NionOps
   (mag [this]
-    (->
-      this
-      norm
-      Math/sqrt))
+    (nion-ops-mag this))
   (scale [this s]
-    (loop [new-this this
-           idx      (dec (:order this))]
-      (let [new-new-this (set-idx
-                           new-this
-                           idx
-                           (*
-                             s
-                             (get-idx new-this idx)))]
-        (if (pos? idx)
-          (recur new-new-this (dec idx))
-          new-new-this))))
+    (nion-ops-scale this s))
   (norm [this]
-    (loop [sum 0
-           idx (dec (:order this))]
-      (let [new-sum (+
-                      sum
-                      (* (get-idx this idx)
-                         (get-idx this idx)))]
-        (if (pos? idx)
-          (recur new-sum (dec idx))
-          new-sum))))
+    (nion-ops-norm this))
   (inv [this]
-    (scale (c this)
-           (/ 1.0
-              (norm this))))
+    (nion-ops-inv this))
   (rot [this other]
-    (times
-      (times other
-             this)
-      (inv other))))
-
-(defn eq-order? [a b]
-  (and
-    (:order a)
-    (:order b)
-    (= (:order a) (:order b))))
+    (nion-ops-rot this other)))
 
 (defrecord Construction [a b]
   Nion
@@ -183,41 +195,15 @@
 
   NionOps
   (mag [this]
-    (->
-      this
-      norm
-      Math/sqrt))
+    (nion-ops-mag this))
   (scale [this s]
-    (loop [new-this this
-           idx      (dec (:order this))]
-      (let [new-new-this (set-idx
-                           new-this
-                           idx
-                           (*
-                             s
-                             (get-idx new-this idx)))]
-        (if (pos? idx)
-          (recur new-new-this (dec idx))
-          new-new-this))))
+    (nion-ops-scale this s))
   (norm [this]
-    (loop [sum 0
-           idx (dec (:order this))]
-      (let [new-sum (+
-                      sum
-                      (* (get-idx this idx)
-                         (get-idx this idx)))]
-        (if (pos? idx)
-          (recur new-sum (dec idx))
-          new-sum))))
+    (nion-ops-norm this))
   (inv [this]
-    (scale (c this)
-           (/ 1.0
-              (norm this))))
+    (nion-ops-inv this))
   (rot [this other]
-    (times
-      (times other
-             this)
-      (inv other))))
+    (nion-ops-rot this other)))
 
 (defn- init-complex2 [a b]
   (init
