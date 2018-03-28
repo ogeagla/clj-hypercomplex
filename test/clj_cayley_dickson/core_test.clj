@@ -4,42 +4,6 @@
             [clojure.pprint :refer :all]))
 
 
-;(println "order 2:" (complex2 1 1))
-;
-;(println
-;  "times order 2:")
-;
-;(pprint
-;  (times (complex2 1 1)
-;         (complex2 1 1)))
-;
-;(println
-;  "order 4:"
-;  (complex4 1 1 1 1))
-;
-;(println
-;  "times order 4:")
-;
-;(pprint
-;  (times (complex4 1 1 1 1)
-;         (complex4 1 1 1 1)))
-;
-;(println "order 8: " (complex8 1 1 1 1 1 1 1 1))
-;
-;(println
-;  "times order 8:")
-;(pprint
-;  (times (complex8 1 1 1 1 1 1 1 1)
-;         (complex8 1 1 1 1 1 1 1 1)))
-;
-;(println "inv: " (inv (complex4 1 1 1 1)))
-;
-;(println "norm: " (norm (complex4 1 1 1 1)))
-;
-;(println "mag: " (mag (complex4 1 1 1 1)))
-;
-;(println "scale: " (scale (complex4 1 1 1 1) 0.5))
-
 (deftest cayley-dickson-constructions-test
   (testing "Commutivity holds for order <= 2"
     (is
@@ -85,3 +49,41 @@
                (octonion {:a 0 :b 2 :c 3 :d 4 :e 4 :f 3 :g 2 :h 1})
                (octonion {:a 8 :b 7 :c 6 :d 5 :e 5 :f 6 :g 7 :h 8}))
              (octonion {:a 9 :b 10 :c 11 :d 13 :e 12 :f 11 :g 10 :h 9})))))))
+
+
+
+;(println "order 2:" (complex2 1 1))
+;
+;(println
+;  "times order 2:")
+;
+;(pprint
+;  (times (complex2 1 1)
+;         (complex2 1 1)))
+;
+;(println
+;  "order 4:"
+;  (complex4 1 1 1 1))
+;
+;(println
+;  "times order 4:")
+;
+;(pprint
+;  (times (complex4 1 1 1 1)
+;         (complex4 1 1 1 1)))
+;
+;(println "order 8: " (complex8 1 1 1 1 1 1 1 1))
+;
+;(println
+;  "times order 8:")
+;(pprint
+;  (times (complex8 1 1 1 1 1 1 1 1)
+;         (complex8 1 1 1 1 1 1 1 1)))
+;
+;(println "inv: " (inv (complex4 1 1 1 1)))
+;
+;(println "norm: " (norm (complex4 1 1 1 1)))
+;
+;(println "mag: " (mag (complex4 1 1 1 1)))
+;
+;(println "scale: " (scale (complex4 1 1 1 1) 0.5))

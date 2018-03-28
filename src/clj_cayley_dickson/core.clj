@@ -39,8 +39,6 @@
                       (:b this))))
 
   (times [this other]
-    ;new.a = self.a * other.a - other.b * self.b
-    ;new.b = self.a * other.b + other.a * self.b
     (assoc this :a (- (* (:a this) (:a other))
                       (* (:b other) (:b this)))
                 :b (+ (* (:a this) (:b other))
@@ -94,8 +92,6 @@
     (assoc this :a (c (:a this))
                 :b (neg (:b this))))
   (times [this other]
-    ;new.a = self.a * other.a - other.b.c() * self.b
-    ;new.b = other.b * self.a + self.b * other.a.c()
     (if-not (eq-order? a b)
       (println "Orders don't match or missing" a b)
       (assoc this :a (minus
@@ -128,7 +124,6 @@
           false)
       true))
   (get-idx [this idx]
-    ;(println "*GETIDX " idx this)
     (when (valid-idx? this idx)
       (let [new-idx (mod idx
                          (/ (:order this)
@@ -138,11 +133,9 @@
                               2))
                       (get-idx (:a this) new-idx)
                       (get-idx (:b this) new-idx))]
-
         retval)))
 
   (set-idx [this idx new-val]
-    ;(println "*SETIDX " idx this new-val)
     (when (valid-idx? this idx)
       (let [new-idx (mod idx (/ (:order this) 2))]
         (if (< idx
@@ -158,7 +151,6 @@
       norm
       Math/sqrt))
   (scale [this s]
-    ;(println "*SCALE " this s)
     (loop [new-this this
            idx      (dec (:order this))]
       (let [new-new-this (set-idx
@@ -171,7 +163,6 @@
           (recur new-new-this (dec idx))
           new-new-this))))
   (norm [this]
-    ;(println "*NORM" this)
     (loop [sum 0
            idx (dec (:order this))]
       (let [new-sum (+
@@ -182,7 +173,6 @@
           (recur new-sum (dec idx))
           new-sum))))
   (inv [this]
-    ;(println "* INV" this)
     (scale (c this)
            (/ 1.0
               (norm this))))
@@ -192,34 +182,40 @@
              this)
       (inv other))))
 
+(defn- init-complex2 [a b]
+  (init
+    (->Complex2 a b)))
+
+(defn- init-construction [a b]
+  (init
+    (->Construction a b)))
+
 (defn complex [{:keys
                 [a b]
                 :as
                 params}]
-  (init (->Complex2 a b)))
+  (init-complex2 a b))
 
 (defn quaternion [{:keys
                    [a b c d]
                    :as
                    params}]
-  (init
-    (->Construction
-      (complex
-        {:a a :b b})
-      (complex
-        {:a c :b d}))))
+  (init-construction
+    (complex
+      {:a a :b b})
+    (complex
+      {:a c :b d})))
 
 (defn octonion [{:keys
                  [a b c d
                   e f g h]
                  :as
                  params}]
-  (init
-    (->Construction
-      (quaternion
-        {:a a :b b :c c :d d})
-      (quaternion
-        {:a e :b f :c g :d h}))))
+  (init-construction
+    (quaternion
+      {:a a :b b :c c :d d})
+    (quaternion
+      {:a e :b f :c g :d h})))
 
 (defn sedonion [{:keys
                  [a b c d
@@ -228,10 +224,9 @@
                   m n o p]
                  :as
                  params}]
-  (init
-    (->Construction
-      (octonion
-        {:a a :b b :c c :d d :e e :f f :g g :h h})
-      (octonion
-        {:a i :b j :c k :d l :e m :f n :g o :h p}))))
+  (init-construction
+    (octonion
+      {:a a :b b :c c :d d :e e :f f :g g :h h})
+    (octonion
+      {:a i :b j :c k :d l :e m :f n :g o :h p})))
 
