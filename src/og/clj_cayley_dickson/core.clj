@@ -1,4 +1,4 @@
-(ns clj-cayley-dickson.core
+(ns og.clj-cayley-dickson.core
   (:gen-class))
 
 ; inspired by https://github.com/hamiltron/py-cayleydickson/blob/master/cayleydickson.py

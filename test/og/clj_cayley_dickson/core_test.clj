@@ -1,6 +1,6 @@
-(ns clj-cayley-dickson.core-test
+(ns og.clj-cayley-dickson.core-test
   (:require [clojure.test :refer :all]
-            [clj-cayley-dickson.core :refer :all]
+            [og.clj-cayley-dickson.core :refer :all]
             [clojure.pprint :refer :all]))
 
 
