@@ -1,6 +1,8 @@
 (ns clj-cayley-dickson.core
   (:gen-class))
 
+; inspired by https://github.com/hamiltron/py-cayleydickson/blob/master/cayleydickson.py
+
 (defn -main
   [& args]
   (println "Hello, World!"))
@@ -190,602 +192,57 @@
     (times
       (times other
              this)
-      (inv other)))
-  )
+      (inv other))))
+
+(defn complex2 [a b]
+  (init (->Complex2 a b)))
+
+(defn complex4 [a b c d]
+  (init (->Construction
+          (complex2 a b)
+          (complex2 c d))))
+
+(defn complex8 [a b c d e f g h]
+  (init (->Construction
+          (complex4 a b c d)
+          (complex4 e f g h))))
+
+(defn complex16 [a b c d e f g h
+                 i j k l m n o p]
+  (init (->Construction
+          (complex8 a b c d e f g h)
+          (complex8 i j k l m n o p))))
+
+(println "order 2:" (complex2 1 1))
 
 (println
-  "order 2:"
-  (times (c (init (->Complex2 2.1 3.2)))
-         (init (->Complex2 2.1 3.200000000000000001))))
+  "times order 2:")
+
+(clojure.pprint/pprint
+  (times (complex2 1 1)
+         (complex2 1 1)))
 
 (println
   "order 4:"
-  (init (->Construction (c (init (->Complex2 2.1 3.2)))
-                        (neg (init (->Complex2 2.1 3.2))))))
+  (complex4 1 1 1 1))
 
 (println
-  "times: "
-  (times
-    (init (->Construction (init (->Construction (c (init (->Complex2 2.1 3.2)))
-                                                (neg (init (->Complex2 2.1 3.2)))))
-                          (init (->Construction (c (init (->Complex2 2.1 3.2)))
-                                                (neg (init (->Complex2 2.1 3.2)))))))
-    (init (->Construction (init (->Construction (c (init (->Complex2 2.1 3.2)))
-                                                (neg (init (->Complex2 2.1 3.2)))))
-                          (init (->Construction (c (init (->Complex2 2.1 3.2)))
-                                                (neg (init (->Complex2 2.1 3.2)))))))))
+  "times order 4:")
 
-(println "inv: " (inv
-                   (init
-                     (->Construction
-                       (init (->Complex2 1.0 1.0))
-                       (init (->Complex2 1.0 1.0))))))
+(clojure.pprint/pprint
+  (times (complex4 1 1 1 1)
+         (complex4 1 1 1 1)))
 
-(println "norm: " (norm
-                    (init
-                      (->Construction
-                        (init (->Complex2 1.0 1.0))
-                        (init (->Complex2 1.0 1.0))))))
+(println "order 8: " (complex8 1 1 1 1 1 1 1 1))
 
-(println "scale: " (scale
-                     (init
-                       (->Construction
-                         (init (->Complex2 1.0 1.0))
-                         (init (->Complex2 1.0 1.0))))
-                     0.5))
+(println
+  "times order 8:")
+(clojure.pprint/pprint
+  (times (complex8 1 1 1 1 1 1 1 1)
+         (complex8 1 1 1 1 1 1 1 1)))
 
-#_(clojure.pprint/pprint
-    (times (init
-             (->Construction
-               (init
-                 (->Construction
-                   (init
-                     (->Construction
-                       (c (init
-                            (->Complex2 2.1 3.2)))
-                       (neg (init
-                              (->Complex2 2.1 3.2)))))
-                   (init
-                     (->Construction
-                       (c (init
-                            (->Complex2 2.1 3.2)))
-                       (neg (init (->Complex2 2.1 3.2)))))))
-               (init
-                 (->Construction
-                   (init
-                     (->Construction
-                       (c (init
-                            (->Complex2 2.1 3.2)))
-                       (neg (init
-                              (->Complex2 2.1 3.2)))))
-                   (init
-                     (->Construction
-                       (init
-                         (->Complex2 2.1 3.2))
-                       (neg (init
-                              (->Complex2 2.1 3.2)))))))))
-           (init
-             (->Construction
-               (init
-                 (->Construction
-                   (init
-                     (->Construction
-                       (c (init
-                            (->Complex2 2.1 3.2)))
-                       (neg (init
-                              (->Complex2 2.1 3.2)))))
-                   (init
-                     (->Construction
-                       (c (init
-                            (->Complex2 2.1 3.2)))
-                       (init (->Complex2 2.1 3.2))))))
-               (init
-                 (->Construction
-                   (init
-                     (->Construction
-                       (c (init
-                            (->Complex2 2.1 3.2)))
-                       (neg (init
-                              (->Complex2 2.1 3.2)))))
-                   (init
-                     (->Construction
-                       (c (init
-                            (->Complex2 2.1 3.2)))
-                       (neg (init
-                              (->Complex2 2.1 3.2)))))))))))
+(println "inv: " (inv (complex4 1 1 1 1)))
 
-#_(clojure.pprint/pprint
-    (times
+(println "norm: " (norm (complex4 1 1 1 1)))
 
-      (init
-        (->Construction
-          (init
-            (->Construction
-              (init
-                (->Construction
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))))
-              (init
-                (->Construction
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))))))
-          (init
-            (->Construction
-              (init
-                (->Construction
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))))
-              (init
-                (->Construction
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))))))))
-      (init
-        (->Construction
-          (init
-            (->Construction
-              (init
-                (->Construction
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))))
-              (init
-                (->Construction
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))))))
-          (init
-            (->Construction
-              (init
-                (->Construction
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))))
-              (init
-                (->Construction
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))
-                  (init
-                    (->Construction
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init (->Complex2 2.1 3.2)))))))
-                      (init
-                        (->Construction
-                          (init
-                            (->Construction
-                              (c (init
-                                   (->Complex2 2.1 3.2)))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))
-                          (init
-                            (->Construction
-                              (init
-                                (->Complex2 2.1 3.2))
-                              (neg (init
-                                     (->Complex2 2.1 3.2)))))))))))))))))
+(println "scale: " (scale (complex4 1 1 1 1) 0.5))
