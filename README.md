@@ -7,7 +7,7 @@ Credit to https://github.com/hamiltron/py-cayleydickson for some guidance (MIT L
 
 ## Usage Example
 
-As an example, the quaternions are associative.  Here's an example using `clj-cayley-dickson` demonstrating for some fixed values:
+As an example, the quaternions are associative.  Here's an example using `clj-cayley-dickson` demonstrating this property for some fixed values:
 
 ```clojure
 (is
@@ -31,6 +31,9 @@ Or, you can use the operations on the algebras like `scale`, `norm`, `inv`, or `
        (quaternion {:a 1 :b 1 :c 1 :d 1})
        1.5)))
 ```
+
+In addition to `quaternion`, this library also provides built-in support to construct `complex`, `octonion`, and `sedenion` algebras, with easy extensibility for higher order algebras.
+
 ## Tests
 
 ```bash
