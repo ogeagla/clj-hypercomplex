@@ -73,7 +73,44 @@
              (/ (:order this)
                 2))
         (assoc this :a new-val)
-        (assoc this :b new-val)))))
+        (assoc this :b new-val))))
+  NionOps
+  (mag [this]
+    (->
+      this
+      norm
+      Math/sqrt))
+  (scale [this s]
+    (loop [new-this this
+           idx      (dec (:order this))]
+      (let [new-new-this (set-idx
+                           new-this
+                           idx
+                           (*
+                             s
+                             (get-idx new-this idx)))]
+        (if (pos? idx)
+          (recur new-new-this (dec idx))
+          new-new-this))))
+  (norm [this]
+    (loop [sum 0
+           idx (dec (:order this))]
+      (let [new-sum (+
+                      sum
+                      (* (get-idx this idx)
+                         (get-idx this idx)))]
+        (if (pos? idx)
+          (recur new-sum (dec idx))
+          new-sum))))
+  (inv [this]
+    (scale (c this)
+           (/ 1.0
+              (norm this))))
+  (rot [this other]
+    (times
+      (times other
+             this)
+      (inv other))))
 
 (defn eq-order? [a b]
   (and
