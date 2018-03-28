@@ -1,4 +1,5 @@
 (ns clj-cayley-dickson.core
+  (:require [clojure.pprint :refer :all])
   (:gen-class))
 
 ; inspired by https://github.com/hamiltron/py-cayleydickson/blob/master/cayleydickson.py
@@ -52,6 +53,7 @@
                       (:b other))))
   (minus [this other]
     (plus this (neg other)))
+
   (valid-idx? [this idx]
     (if-not
       (and
@@ -60,6 +62,7 @@
       (do (println "C2 Index must be int 0 or 1: " idx)
           false)
       true))
+
   (get-idx [this idx]
     (when (valid-idx? this idx)
       (if (< idx
@@ -89,12 +92,8 @@
       (assoc this
         :order (* 2 (:order a)))))
   (c [this]
-    ;new.a = self.a.c()
-    ;new.b = -(self.b)
-    ;(println "* C" this)
     (assoc this :a (c (:a this))
-                :b (neg (:b this)))
-    )
+                :b (neg (:b this))))
   (times [this other]
     ;new.a = self.a * other.a - other.b.c() * self.b
     ;new.b = other.b * self.a + self.b * other.a.c()
@@ -218,7 +217,7 @@
 (println
   "times order 2:")
 
-(clojure.pprint/pprint
+(pprint
   (times (complex2 1 1)
          (complex2 1 1)))
 
@@ -229,7 +228,7 @@
 (println
   "times order 4:")
 
-(clojure.pprint/pprint
+(pprint
   (times (complex4 1 1 1 1)
          (complex4 1 1 1 1)))
 
@@ -237,12 +236,14 @@
 
 (println
   "times order 8:")
-(clojure.pprint/pprint
+(pprint
   (times (complex8 1 1 1 1 1 1 1 1)
          (complex8 1 1 1 1 1 1 1 1)))
 
 (println "inv: " (inv (complex4 1 1 1 1)))
 
 (println "norm: " (norm (complex4 1 1 1 1)))
+
+(println "mag: " (mag (complex4 1 1 1 1)))
 
 (println "scale: " (scale (complex4 1 1 1 1) 0.5))
