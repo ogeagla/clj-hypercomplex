@@ -26,17 +26,12 @@
   (rot [this other]))
 
 
-(defn eq-order? [a b]
-  (and
-    (:order a)
-    (:order b)
-    (= (:order a) (:order b))))
-
 (defn- nion-ops-mag [this]
   (->
     this
     norm
     Math/sqrt))
+
 (defn- nion-ops-scale [this s]
   (loop [new-this this
          idx      (dec (:order this))]
@@ -49,6 +44,7 @@
       (if (pos? idx)
         (recur new-new-this (dec idx))
         new-new-this))))
+
 (defn- nion-ops-norm [this]
   (loop [sum 0
          idx (dec (:order this))]
@@ -59,15 +55,25 @@
       (if (pos? idx)
         (recur new-sum (dec idx))
         new-sum))))
+
 (defn- nion-ops-inv [this]
   (scale (c this)
          (/ 1.0
             (norm this))))
+
 (defn- nion-ops-rot [this other]
   (times
     (times other
            this)
     (inv other)))
+
+
+(defn eq-order? [a b]
+  (and
+    (:order a)
+    (:order b)
+    (= (:order a)
+       (:order b))))
 
 (defrecord Complex2 [a b]
   Nion
@@ -161,7 +167,6 @@
                            (:b other)))))
   (minus [this other]
     (plus this (neg other)))
-
   (valid-idx? [this idx]
     (if-not (and
               (:order this)
@@ -169,27 +174,27 @@
                  (int idx))
               (>= idx 0)
               (<= idx (:order this)))
-      (do (println "Construction Index must be int less than order: " idx (:order this))
+      (do (println
+            "Construction Index must be int less than order: "
+            idx (:order this))
           false)
       true))
   (get-idx [this idx]
     (when (valid-idx? this idx)
-      (let [new-idx (mod idx
-                         (/ (:order this)
-                            2))
-            retval  (if (< idx
-                           (/ (:order this)
-                              2))
-                      (get-idx (:a this) new-idx)
-                      (get-idx (:b this) new-idx))]
+      (let [half-order (/ (:order this)
+                          2)
+            new-idx    (mod idx half-order)
+            retval     (if (< idx half-order)
+                         (get-idx (:a this) new-idx)
+                         (get-idx (:b this) new-idx))]
         retval)))
 
   (set-idx [this idx new-val]
     (when (valid-idx? this idx)
-      (let [new-idx (mod idx (/ (:order this) 2))]
-        (if (< idx
-               (/ (:order this)
-                  2))
+      (let [half-order (/ (:order this)
+                          2)
+            new-idx    (mod idx half-order)]
+        (if (< idx half-order)
           (assoc this :a (set-idx (:a this) new-idx new-val))
           (assoc this :b (set-idx (:b this) new-idx new-val))))))
 
@@ -214,15 +219,13 @@
     (->Construction a b)))
 
 (defn complex [{:keys
-                [a b]
-                :as
-                params}]
+                    [a b]
+                :as params}]
   (init-complex2 a b))
 
 (defn quaternion [{:keys
-                   [a b c d]
-                   :as
-                   params}]
+                       [a b c d]
+                   :as params}]
   (init-construction
     (complex
       {:a a :b b})
@@ -230,10 +233,9 @@
       {:a c :b d})))
 
 (defn octonion [{:keys
-                 [a b c d
-                  e f g h]
-                 :as
-                 params}]
+                     [a b c d
+                      e f g h]
+                 :as params}]
   (init-construction
     (quaternion
       {:a a :b b :c c :d d})
@@ -241,12 +243,11 @@
       {:a e :b f :c g :d h})))
 
 (defn sedenion [{:keys
-                 [a b c d
-                  e f g h
-                  i j k l
-                  m n o p]
-                 :as
-                 params}]
+                     [a b c d
+                      e f g h
+                      i j k l
+                      m n o p]
+                 :as params}]
   (init-construction
     (octonion
       {:a a :b b :c c :d d :e e :f f :g g :h h})
@@ -254,15 +255,16 @@
       {:a i :b j :c k :d l :e m :f n :g o :h p})))
 
 (defn trigdunion [{:keys
-                   [a b c d e f g h
-                    i j k l m n o p
-                    q r s t u v w x
-                    y z aa bb cc dd ee ff]
-                   :as
-                   params}]
+                       [a b c d e f g h
+                        i j k l m n o p
+                        q r s t u v w x
+                        y z aa bb cc dd ee ff]
+                   :as params}]
   (init-construction
     (sedenion
-      {:a a :b b :c c :d d :e e :f f :g g :h h :i i :j j :k k :l l :m m :n n :o o :p p})
+      {:a a :b b :c c :d d :e e :f f :g g :h h
+       :i i :j j :k k :l l :m m :n n :o o :p p})
     (sedenion
-      {:a q :b r :c s :d t :e u :f v :g w :h x :i y :j z :k aa :l bb :m cc :n dd :o ee :p ff})))
+      {:a q :b r :c s :d t :e u :f v :g w :h x
+       :i y :j z :k aa :l bb :m cc :n dd :o ee :p ff})))
 
