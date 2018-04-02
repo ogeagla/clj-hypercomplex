@@ -1,9 +1,10 @@
 # clj-cayley-dickson
 
 Cayley-Dickson construction for generating hypercomplex algebras in Clojure.
+
 https://en.wikipedia.org/wiki/Cayley%E2%80%93Dickson_construction
 
-Credit to https://github.com/hamiltron/py-cayleydickson for some guidance (MIT License).
+![The Hypercomplex Numbers](papers/Figure1.JPG)
 
 ## Usage
 
@@ -41,6 +42,11 @@ lein test
 ```
 
 ## License
+
+Credits to:
+  - https://github.com/hamiltron/py-cayleydickson (MIT License)
+  - https://nakkaya.com/2009/09/29/fractals-in-clojure-mandelbrot-fractal/
+  - https://github.com/clojure-numerics/image-matrix/blob/master/src/main/clojure/mikera/image_matrix/colours.clj (EPL License)
 
 Copyright © 2018 FIXME
 

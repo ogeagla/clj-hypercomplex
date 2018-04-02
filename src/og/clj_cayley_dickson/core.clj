@@ -1,5 +1,6 @@
 (ns og.clj-cayley-dickson.core
-  (:gen-class))
+  (:gen-class)
+  (:import (org.apache.commons.math3.complex Complex)))
 
 ; inspired by https://github.com/hamiltron/py-cayleydickson/blob/master/cayleydickson.py
 
@@ -74,6 +75,74 @@
     (:order b)
     (= (:order a)
        (:order b))))
+
+
+(defrecord Complex2Apache [a b]
+  Nion
+  (init [this]
+    (assoc this :order 2
+                :obj (Complex. a b)))
+  (c [this]
+    (let [cpx-cnj (.conjugate (:obj this))]
+      (assoc this :obj cpx-cnj
+                  :a (.getReal cpx-cnj)
+                  :b (.getImaginary cpx-cnj))))
+  (neg [this]
+    (let [cpx-neg (.negate (:obj this))]
+      (assoc this :obj cpx-neg
+                  :a (.getReal cpx-neg)
+                  :b (.getImaginary cpx-neg))))
+  (times [this other]
+    (let [cpx-times (.multiply (:obj this) (:obj other))]
+      (assoc this :obj cpx-times
+                  :a (.getReal cpx-times)
+                  :b (.getImaginary cpx-times))))
+  (plus [this other]
+    (let [cpx-add (.add (:obj this) (:obj other))]
+      (assoc this :obj cpx-add
+                  :a (.getReal cpx-add)
+                  :b (.getImaginary cpx-add))))
+  (minus [this other]
+    (let [cpx-subtract (.subtract (:obj this) (:obj other))]
+      (assoc this :obj cpx-subtract
+                  :a (.getReal cpx-subtract)
+                  :b (.getImaginary cpx-subtract))))
+  (valid-idx? [this idx]
+    (if-not
+      (and
+        (contains? #{0 1} idx)
+        (:order this))
+      (do (println "C2 Index must be int 0 or 1: " idx)
+          false)
+      true))
+
+  (get-idx [this idx]
+    (when (valid-idx? this idx)
+      (if (< idx
+             (/ (:order this)
+                2))
+        (:a this)
+        (:b this))))
+  (set-idx [this idx new-val]
+    (when (valid-idx? this idx)
+      (if (< idx
+             (/ (:order this)
+                2))
+        (assoc this :a new-val
+                    :obj (Complex. new-val (:b this)))
+        (assoc this :b new-val
+                    :obj (Complex. (:a this) new-val)))))
+  NionOps
+  (mag [this]
+    (nion-ops-mag this))
+  (scale [this s]
+    (nion-ops-scale this s))
+  (norm [this]
+    (nion-ops-norm this))
+  (inv [this]
+    (nion-ops-inv this))
+  (rot [this other]
+    (nion-ops-rot this other)))
 
 (defrecord Complex2 [a b]
   Nion
@@ -210,61 +279,15 @@
   (rot [this other]
     (nion-ops-rot this other)))
 
-(defn- init-complex2 [a b]
-  (init
-    (->Complex2 a b)))
+(defn init-complex2 [a b impl]
+  (case impl
+    :plain (init
+             (->Complex2 a b))
+    :apache (init
+              (->Complex2Apache a b))))
 
-(defn- init-construction [a b]
+(defn init-construction [a b]
   (init
     (->Construction a b)))
 
-(defn complex [{:keys
-                    [a b]
-                :as params}]
-  (init-complex2 a b))
-
-(defn quaternion [{:keys
-                       [a b c d]
-                   :as params}]
-  (init-construction
-    (complex
-      {:a a :b b})
-    (complex
-      {:a c :b d})))
-
-(defn octonion [{:keys
-                     [a b c d
-                      e f g h]
-                 :as params}]
-  (init-construction
-    (quaternion
-      {:a a :b b :c c :d d})
-    (quaternion
-      {:a e :b f :c g :d h})))
-
-(defn sedenion [{:keys
-                     [a b c d
-                      e f g h
-                      i j k l
-                      m n o p]
-                 :as params}]
-  (init-construction
-    (octonion
-      {:a a :b b :c c :d d :e e :f f :g g :h h})
-    (octonion
-      {:a i :b j :c k :d l :e m :f n :g o :h p})))
-
-(defn trigdunion [{:keys
-                       [a b c d e f g h
-                        i j k l m n o p
-                        q r s t u v w x
-                        y z aa bb cc dd ee ff]
-                   :as params}]
-  (init-construction
-    (sedenion
-      {:a a :b b :c c :d d :e e :f f :g g :h h
-       :i i :j j :k k :l l :m m :n n :o o :p p})
-    (sedenion
-      {:a q :b r :c s :d t :e u :f v :g w :h x
-       :i y :j z :k aa :l bb :m cc :n dd :o ee :p ff})))
 
