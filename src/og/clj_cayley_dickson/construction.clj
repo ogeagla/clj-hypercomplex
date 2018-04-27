@@ -1,5 +1,5 @@
 (ns og.clj-cayley-dickson.construction
-  (:require [og.clj-cayley-dickson.core :refer :all]))
+  (:require [og.clj-cayley-dickson.core :refer [init-complex2 init-construction]]))
 
 
 ; :impl can be in #{:plain :apache}
