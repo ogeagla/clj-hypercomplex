@@ -1,4 +1,4 @@
-(ns og.clj-cayley-dickson.core
+(ns og.cayley-dickson.core
   (:gen-class)
   (:import (org.apache.commons.math3.complex Complex)))
 

@@ -1,7 +1,7 @@
-(ns og.clj-cayley-dickson.core-test
+(ns og.cayley-dickson.core-test
   (:require [clojure.test :refer :all]
-            [og.clj-cayley-dickson.core :refer :all]
-            [og.clj-cayley-dickson.construction :refer
+            [og.cayley-dickson.core :refer :all]
+            [og.cayley-dickson.construction :refer
              [complex quaternion octonion sedenion pathion]]
             [clojure.pprint :refer :all]))
 
@@ -23,8 +23,13 @@
                (:b (:b q1))
                (:b (:b q2)))))
 
-(deftest cayley-dickson-constructions-test
+(deftest quat-math
+  (testing "Product of quaternions"
+    (is (= (quaternion {:a 11 :b -30 :c 25 :d 26})
+           (times (quaternion {:a 1 :b -2 :c 3 :d 2})
+                  (quaternion {:a 11 :b -2 :c 0 :d -2}))))))
 
+(deftest cayley-dickson-constructions-test
   (testing "Rotation"
     (is (= (quaternion {:a 1.5 :b 1.5 :c 1.5 :d 1.5})
            (rot (quaternion {:a 1.5 :b 1.5 :c 1.5 :d 1.5})
