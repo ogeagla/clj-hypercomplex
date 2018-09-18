@@ -1,5 +1,5 @@
-(ns og.clj-cayley-dickson.construction
-  (:require [og.clj-cayley-dickson.core :refer :all]))
+(ns og.cayley-dickson.construction
+  (:require [og.cayley-dickson.core :refer :all]))
 
 
 ; :impl can be in #{:plain :apache}
