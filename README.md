@@ -1,6 +1,6 @@
 # clj-hypercomplex
 
-[![Build Status](https://travis-ci.org/ogeagla/clj-hypercomplex.png)](https://travis-ci.org/ogeagla/clj-hypercomplex)
+[![Build Status](https://travis-ci.com/ogeagla/clj-hypercomplex.svg?branch=master)](https://travis-ci.com/ogeagla/clj-hypercomplex)
 
 
 A hypercomplex number library for Clojure.
