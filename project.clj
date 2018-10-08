@@ -1,4 +1,4 @@
-(defproject clj-hypercomplex "0.0.1-SNAPSHOT"
+(defproject clj-hypercomplex "0.0.1"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
