@@ -1,4 +1,4 @@
-# clj-hypercomplex
+# hypercomplex
 
 [![Build Status](https://travis-ci.com/ogeagla/clj-hypercomplex.svg?branch=master)](https://travis-ci.com/ogeagla/clj-hypercomplex)
 
@@ -8,9 +8,9 @@
 [hypercomplex "0.0.1"]
 ```
 
-A hypercomplex number library for Clojure.
+A hypercomplex number library written in Clojure.
 
-Includes Cayley-Dickson construction for generating hypercomplex algebras and built-in operators.
+Includes Cayley-Dickson construction for generating and working with hypercomplex algebras.
 
 https://en.wikipedia.org/wiki/Cayley%E2%80%93Dickson_construction
 
@@ -18,7 +18,7 @@ https://en.wikipedia.org/wiki/Cayley%E2%80%93Dickson_construction
 
 ## Usage
 
-Here's an example of using `clj-hypercomplex` to demonstrate that the quaternions are associative for some fixed values:
+Here's an example of using `hypercomplex` to demonstrate that the quaternions are associative for some fixed values:
 
 ```clojure
 (:require [hypercomplex.core :refer :all]
