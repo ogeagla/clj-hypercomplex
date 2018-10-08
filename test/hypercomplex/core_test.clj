@@ -1,7 +1,7 @@
-(ns og.cayley-dickson.core-test
+(ns hypercomplex.core-test
   (:require [clojure.test :refer :all]
-            [og.cayley-dickson.core :refer :all]
-            [og.cayley-dickson.construction :refer
+            [hypercomplex.core :refer :all]
+            [hypercomplex.cayley-dickson-construction :refer
              [complex quaternion octonion sedenion pathion]]
             [clojure.pprint :refer :all]))
 

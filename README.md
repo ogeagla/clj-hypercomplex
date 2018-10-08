@@ -1,6 +1,11 @@
-# clj-cayley-dickson
+# clj-hypercomplex
 
-Cayley-Dickson construction for generating hypercomplex algebras in Clojure.
+[![Build Status](https://travis-ci.org/ogeagla/clj-hypercomplex.png)](https://travis-ci.org/ogeagla/clj-hypercomplex)
+
+
+A hypercomplex number library for Clojure.
+
+Includes Cayley-Dickson construction for generating hypercomplex algebras and built-in operators.
 
 https://en.wikipedia.org/wiki/Cayley%E2%80%93Dickson_construction
 
@@ -8,9 +13,13 @@ https://en.wikipedia.org/wiki/Cayley%E2%80%93Dickson_construction
 
 ## Usage
 
-Here's an example of using `clj-cayley-dickson` to demonstrate that the quaternions are associative for some fixed values:
+Here's an example of using `clj-hypercomplex` to demonstrate that the quaternions are associative for some fixed values:
 
 ```clojure
+(:require [hypercomplex.core :refer :all]
+          [hypercomplex.cayley-dickson-construction :refer
+            [complex quaternion octonion sedenion pathion]])
+
 (is
   (= (times
        (quaternion {:a 1 :b 2 :c 3 :d 4})
@@ -31,6 +40,12 @@ Or, you can use operations on the algebras like `scale`, `norm`, `inv`, or `mag`
      (scale 
        (quaternion {:a 1 :b 1 :c 1 :d 1})
        1.5)))
+       
+(is (= 32
+       (norm (pathion {:a 1 :b 1 :c 1 :d 1 :e 1 :f 1 :g 1 :h 1
+                       :i 1 :j 1 :k 1 :l 1 :m 1 :n 1 :o 1 :p 1
+                       :q 1 :r 1 :s 1 :t 1 :u 1 :v 1 :w 1 :x 1
+                       :y 1 :z 1 :aa 1 :bb 1 :cc 1 :dd 1 :ee 1 :ff 1}))))       
 ```
 
 In addition to `quaternion`, this library also provides built-in support to construct `complex`, `octonion`, and `sedenion` algebras, with easy extensibility for higher order algebras.

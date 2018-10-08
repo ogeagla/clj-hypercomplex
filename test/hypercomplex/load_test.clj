@@ -1,7 +1,7 @@
-(ns og.cayley-dickson.load-test
+(ns hypercomplex.load-test
   (:require [clojure.test :refer :all]
-            [og.cayley-dickson.core :refer :all]
-            [og.cayley-dickson.construction :refer
+            [hypercomplex.core :refer :all]
+            [hypercomplex.cayley-dickson-construction :refer
              [complex quaternion octonion sedenion pathion]])
   (:import (java.util Random)))
 
@@ -89,12 +89,12 @@
   (testing "Load test plain impl"
     (println "Running load test using :plain impl:")
     (time
-      (dotimes [i 100000]
+      (dotimes [i 10000]
         (do-once :plain)))
     )
   (testing "Load test apache impl"
     (println "Running load test using :apache impl:")
     (time
-      (dotimes [i 100000]
+      (dotimes [i 10000]
         (do-once :apache)))
     ))
