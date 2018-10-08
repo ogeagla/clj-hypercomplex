@@ -1,6 +1,7 @@
 (defproject clj-hypercomplex "0.0.1"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "Hypercomplex algebras in Clojure."
+  :url "https://github.com/ogeagla/clj-hypercomplex"
+  :signing {:gpg-key "ogeagla@gmail.com"}
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :plugins      [[lein-ancient "0.6.14"]
