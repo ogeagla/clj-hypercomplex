@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.com/ogeagla/clj-hypercomplex.svg?branch=master)](https://travis-ci.com/ogeagla/clj-hypercomplex)
 
+```clojure
+[hypercomplex "0.0.1"]
+```
 
 A hypercomplex number library for Clojure.
 
