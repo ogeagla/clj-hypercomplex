@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.com/ogeagla/clj-hypercomplex.svg?branch=master)](https://travis-ci.com/ogeagla/clj-hypercomplex)
 
+[![Clojars Project](https://img.shields.io/clojars/v/hypercomplex.svg)](https://clojars.org/hypercomplex)
+
 ```clojure
 [hypercomplex "0.0.1"]
 ```
