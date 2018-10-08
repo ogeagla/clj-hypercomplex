@@ -1,5 +1,8 @@
 # clj-hypercomplex
 
+[![Build Status](https://travis-ci.org/ogeagla/clj-hypercomplex.png)](https://travis-ci.org/ogeagla/clj-hypercomplex)
+
+
 A hypercomplex number library for Clojure.
 
 Includes Cayley-Dickson construction for generating hypercomplex algebras and built-in operators.
