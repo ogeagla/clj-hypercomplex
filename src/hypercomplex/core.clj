@@ -1,12 +1,6 @@
-(ns og.cayley-dickson.core
+(ns hypercomplex.core
   (:gen-class)
   (:import (org.apache.commons.math3.complex Complex)))
-
-; inspired by https://github.com/hamiltron/py-cayleydickson/blob/master/cayleydickson.py
-
-(defn -main
-  [& args]
-  (println "Hello, World!"))
 
 (defprotocol Nion
   (init [this])
