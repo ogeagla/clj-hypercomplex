@@ -66,3 +66,43 @@
       {:a    q :b r :c s :d t :e u :f v :g w :h x
        :i    y :j z :k aa :l bb :m cc :n dd :o ee :p ff
        :impl impl})))
+
+(defn power-of? [number base]
+  (or
+    (= 1 number)
+    (= 1.0 number)
+    (let [log-base-of-number (/
+                               (Math/log number)
+                               (Math/log base))]
+      (zero?
+        (- log-base-of-number
+           (int log-base-of-number))))))
+
+(defn n-hypercomplex
+  "Provide a power-of-2-sized vector of coefficients
+  from which we generate a hypercomplex number. If the
+  coefficient vector does not contain a power-of-2
+  amount of elements, an Exception is thrown."
+  [coeffs impl]
+  (if
+    (and
+      (power-of? (count coeffs) 2)
+      (< 1 (count coeffs)))
+    (if (= 2 (count coeffs))
+      (complex {:a (nth coeffs 0) :b (nth coeffs 1) :impl impl})
+      (let [[first-half-coeffs
+             second-half-coeffs] (split-at
+                                   (int (/ (count coeffs) 2))
+                                   coeffs)]
+        (init-construction
+          (n-hypercomplex first-half-coeffs impl)
+          (n-hypercomplex second-half-coeffs impl))))
+    (do
+      (let [err-str (str
+                      "n-complex requires coefficients count to be a power of 2. Provided: "
+                      (vec coeffs))]
+        (println
+          err-str)
+        (throw
+          (Exception.
+            err-str))))))
