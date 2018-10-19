@@ -58,7 +58,7 @@ An example of several other operators and constructions:
 ```
 An example of creating much higher order algebras using pure Clojure implementation, `:plain`:
 ```clojure
-(c/n-hypercomplex (range 4096) :plain)
+(n-hypercomplex (range 4096) :plain)
 ```
 
 
