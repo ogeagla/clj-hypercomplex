@@ -1,4 +1,4 @@
-(defproject hypercomplex "0.0.1"
+(defproject hypercomplex "0.0.2"
   :description "Hypercomplex algebras in Clojure."
   :url "https://github.com/ogeagla/clj-hypercomplex"
   :signing {:gpg-key "ogeagla@gmail.com"}
