@@ -18,8 +18,12 @@ https://en.wikipedia.org/wiki/Cayley%E2%80%93Dickson_construction
 
 ## Usage
 
-Here's an example of using `hypercomplex` to demonstrate that the quaternions are associative for some fixed values:
+ - `hypercomplex.core` for operators on or between hypercomplex numbers: `times`, `plus`, `minus`, `neg`, `c` (conjugate), `scale`, `norm`, `inv`, and `mag`.
+ - `hypercomplex.cayley-dickson-construction` for constructing hypercomplex numbers: `complex`, `quaternion`, `octonion`, `sedenion`, `pathion`, and `n-hypercomplex` for constructing higher-order algebras of arbitrary order, provided it is a power of 2.
+ - All constructions can take an `:impl`, which can be either `:plain`, or `:apache`, which represent either pure Clojure or `org.apache.commons.math3.complex.Complex` implementations to be used under the hood for constructing the hypercomplex numbers.  
 
+
+An example of creating `quaternion`, performing multiplication, and checking equality as a result of associativity:
 ```clojure
 (:require [hypercomplex.core :refer :all]
           [hypercomplex.cayley-dickson-construction :refer
@@ -36,9 +40,7 @@ Here's an example of using `hypercomplex` to demonstrate that the quaternions ar
          (quaternion {:a 8 :b 7 :c 6 :d 5}))
        (quaternion {:a 9 :b 10 :c 11 :d 12}))))
 ```
-In addition to `times` there is also `plus`, `minus`, `neg`, and `c` (conjugate).
-
-Or, you can use operations on the algebras like `scale`, `norm`, `inv`, or `mag` like so:
+An example of several other operators and constructions:
 ```clojure
 (is 
   (= (quaternion {:a 1.5 :b 1.5 :c 1.5 :d 1.5})
@@ -52,11 +54,13 @@ Or, you can use operations on the algebras like `scale`, `norm`, `inv`, or `mag`
                        :q 1 :r 1 :s 1 :t 1 :u 1 :v 1 :w 1 :x 1
                        :y 1 :z 1 :aa 1 :bb 1 :cc 1 :dd 1 :ee 1 :ff 1}))))       
 ```
+An example of creating much higher order algebras using pure Clojure implementation, `:plain`:
+```clojure
+(c/n-hypercomplex (range 4096) :plain)
+```
 
-In addition to `quaternion`, this library also provides built-in support to construct `complex`, `octonion`, and `sedenion` algebras, with easy extensibility for higher order algebras.
 
 ## Tests
-
 ```bash
 lein test
 ```
