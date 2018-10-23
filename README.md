@@ -29,7 +29,7 @@ An example of creating `quaternion`, performing multiplication, and checking equ
 ```clojure
 (:require [hypercomplex.core :refer :all]
           [hypercomplex.cayley-dickson-construction :refer
-            [complex quaternion octonion sedenion pathion]])
+            [complex quaternion octonion sedenion pathion n-hypercomplex]])
 
 (is
   (= (times
@@ -57,8 +57,73 @@ An example of several other operators and constructions:
                        :y 1 :z 1 :aa 1 :bb 1 :cc 1 :dd 1 :ee 1 :ff 1}))))       
 ```
 An example of creating much higher order algebras using pure Clojure implementation, `:plain`:
+
+```clojure
+(n-hypercomplex [0 1 2 3 4 5 6 7] :plain)
+=> 
+  #hypercomplex.core.Construction
+  {:a #hypercomplex.core.Construction
+      {:a #hypercomplex.core.Complex2
+          {:a     0
+           :b     1                                                                     
+           :order 2}
+       :b #hypercomplex.core.Complex2
+          {:a     2
+           :b     3
+           :order 2}
+       :order 4}
+   :b #hypercomplex.core.Construction
+      {:a #hypercomplex.core.Complex2
+          {:a     4
+           :b     5
+           :order 2}
+       :b #hypercomplex.core.Complex2
+          {:a     6
+           :b     7
+           :order 2}
+       :order 4}
+   :order 8}
+```
+
+
+And a _very_ high order hypercomplex number:
 ```clojure
 (n-hypercomplex (range 4096) :plain)
+=>
+  #hypercomplex.core.Construction
+  {:a #hypercomplex.core.Construction
+      {:a #hypercomplex.core.Construction
+          {:a #hypercomplex.core.Construction
+              {:a #hypercomplex.core.Construction
+                  {:a #hypercomplex.core.Construction
+                      {:a #hypercomplex.core.Construction
+                          {:a #hypercomplex.core.Construction
+                              {:a #hypercomplex.core.Construction
+                                  {:a #hypercomplex.core.Construction
+                                      {:a #hypercomplex.core.Construction
+                                          {:a #hypercomplex.core.Complex2
+                                               {:a 0 
+                                                :b 1 
+                                                :order 2}
+                                           :b #hypercomplex.core.Complex2
+                                               {:a 2 
+                                                :b 3 
+                                                :order 2}
+                                           :order 4}
+                                                ...
+                                                :order 2}
+                                           :order 4} 
+                                       :order 8} 
+                                   :order 16} 
+                               :order 32} 
+                           :order 64} 
+                       :order 128} 
+                   :order 256} 
+               :order 512} 
+           :order 1024} 
+       :order 2048} 
+   :order 4096}
+
 ```
 
 
