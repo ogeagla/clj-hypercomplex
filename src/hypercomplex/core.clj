@@ -1,6 +1,8 @@
 (ns hypercomplex.core
-  (:gen-class)
   (:import (org.apache.commons.math3.complex Complex)))
+
+(set! *unchecked-math* true)
+(set! *warn-on-reflection* true)
 
 (defprotocol Nion
   (init [this])
@@ -19,7 +21,6 @@
   (norm [this])
   (inv [this])
   (rot [this other]))
-
 
 (defn- nion-ops-mag [this]
   (->
@@ -77,30 +78,30 @@
     (assoc this :order 2
                 :obj (Complex. a b)))
   (c [this]
-    (let [cpx-cnj (.conjugate (:obj this))]
+    (let [cpx-cnj (.conjugate ^Complex (:obj this))]
       (assoc this :obj cpx-cnj
                   :a (.getReal cpx-cnj)
                   :b (.getImaginary cpx-cnj))))
   (neg [this]
-    (let [cpx-neg (.negate (:obj this))]
+    (let [cpx-neg (.negate ^Complex (:obj this))]
       (assoc this :obj cpx-neg
-                  :a (.getReal cpx-neg)
-                  :b (.getImaginary cpx-neg))))
+                  :a (.getReal ^Complex cpx-neg)
+                  :b (.getImaginary ^Complex cpx-neg))))
   (times [this other]
-    (let [cpx-times (.multiply (:obj this) (:obj other))]
+    (let [cpx-times (.multiply ^Complex (:obj this) ^Complex (:obj other))]
       (assoc this :obj cpx-times
-                  :a (.getReal cpx-times)
-                  :b (.getImaginary cpx-times))))
+                  :a (.getReal ^Complex cpx-times)
+                  :b (.getImaginary ^Complex cpx-times))))
   (plus [this other]
-    (let [cpx-add (.add (:obj this) (:obj other))]
+    (let [cpx-add (.add ^Complex (:obj this) ^Complex (:obj other))]
       (assoc this :obj cpx-add
-                  :a (.getReal cpx-add)
-                  :b (.getImaginary cpx-add))))
+                  :a (.getReal ^Complex cpx-add)
+                  :b (.getImaginary ^Complex cpx-add))))
   (minus [this other]
-    (let [cpx-subtract (.subtract (:obj this) (:obj other))]
+    (let [cpx-subtract (.subtract ^Complex (:obj this) ^Complex (:obj other))]
       (assoc this :obj cpx-subtract
-                  :a (.getReal cpx-subtract)
-                  :b (.getImaginary cpx-subtract))))
+                  :a (.getReal ^Complex cpx-subtract)
+                  :b (.getImaginary ^Complex cpx-subtract))))
   (valid-idx? [this idx]
     (if-not
       (and
@@ -258,8 +259,8 @@
                           2)
             new-idx    (mod idx half-order)]
         (if (< idx half-order)
-          (assoc this :a (set-idx (:a this) new-idx new-val))
-          (assoc this :b (set-idx (:b this) new-idx new-val))))))
+          (update-in this [:a] set-idx new-idx new-val)
+          (update-in this [:b] set-idx new-idx new-val)))))
 
   NionOps
   (mag [this]

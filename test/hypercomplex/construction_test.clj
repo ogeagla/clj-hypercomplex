@@ -77,7 +77,7 @@
           (c/n-hypercomplex coeffs-5 :plain)
           #hypercomplex.core.Construction{:a #hypercomplex.core.Construction{:a #hypercomplex.core.Construction{:a #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 0, :b 1, :order 2}, :b #hypercomplex.core.Complex2{:a 2, :b 3, :order 2}, :order 4}, :b #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 4, :b 5, :order 2}, :b #hypercomplex.core.Complex2{:a 6, :b 7, :order 2}, :order 4}, :order 8}, :b #hypercomplex.core.Construction{:a #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 8, :b 9, :order 2}, :b #hypercomplex.core.Complex2{:a 10, :b 11, :order 2}, :order 4}, :b #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 12, :b 13, :order 2}, :b #hypercomplex.core.Complex2{:a 14, :b 15, :order 2}, :order 4}, :order 8}, :order 16}, :b #hypercomplex.core.Construction{:a #hypercomplex.core.Construction{:a #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 16, :b 17, :order 2}, :b #hypercomplex.core.Complex2{:a 18, :b 19, :order 2}, :order 4}, :b #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 20, :b 21, :order 2}, :b #hypercomplex.core.Complex2{:a 22, :b 23, :order 2}, :order 4}, :order 8}, :b #hypercomplex.core.Construction{:a #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 24, :b 25, :order 2}, :b #hypercomplex.core.Complex2{:a 26, :b 27, :order 2}, :order 4}, :b #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 28, :b 29, :order 2}, :b #hypercomplex.core.Complex2{:a 30, :b 31, :order 2}, :order 4}, :order 8}, :order 16}, :order 32}))
       #_(is
-        (=
-          (c/n-hypercomplex (range 4096) :plain)
-          {:too :many}))
+          (=
+            (c/n-hypercomplex (range 4096) :plain)
+            {:too :many}))
       )))
