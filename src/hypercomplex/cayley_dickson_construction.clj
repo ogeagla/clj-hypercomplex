@@ -97,12 +97,11 @@
         (init-construction
           (n-hypercomplex first-half-coeffs impl)
           (n-hypercomplex second-half-coeffs impl))))
-    (do
-      (let [err-str (str
-                      "n-complex requires coefficients count to be a power of 2. Provided: "
-                      (vec coeffs))]
-        (println
-          err-str)
-        (throw
-          (Exception.
-            err-str))))))
+    (let [err-str (str
+                    "n-complex requires coefficients count to be a power of 2. Provided: "
+                    (vec coeffs))]
+      (println
+        err-str)
+      (throw
+        (Exception.
+          err-str)))))
