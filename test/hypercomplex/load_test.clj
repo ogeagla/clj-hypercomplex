@@ -89,12 +89,10 @@
   (testing "Load test plain impl"
     (println "Running load test using :plain impl:")
     (time
-      (dotimes [i 10000]
-        (do-once :plain)))
-    )
+      (dotimes [i 5000]
+        (do-once :plain))))
   (testing "Load test apache impl"
     (println "Running load test using :apache impl:")
     (time
-      (dotimes [i 10000]
-        (do-once :apache)))
-    ))
+      (dotimes [i 5000]
+        (do-once :apache)))))

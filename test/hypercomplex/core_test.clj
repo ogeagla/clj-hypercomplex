@@ -29,6 +29,26 @@
            (times (quaternion {:a 1 :b -2 :c 3 :d 2})
                   (quaternion {:a 11 :b -2 :c 0 :d -2}))))))
 
+(deftest invalid-index
+  (testing "Exception is thrown for :apache"
+    (let [c1   (complex {:a 1 :b 1.5 :impl :apache})
+          c1-2 (set-idx c1 0 2.3)]
+      (is (= 2.3 (get-idx c1-2 0)))
+      (try
+        (let [c1-3 (set-idx c1-2 2 3.4)]
+          (println "unreachable" c1-3))
+        (catch Exception e
+          (is (= :invalid-index-access (:type (ex-data e))))))))
+  (testing "Exception is thrown for :plain"
+    (let [c2   (complex {:a 1 :b 1.5 :impl :plain})
+          c2-2 (set-idx c2 0 2.3)]
+      (is (= 2.3 (get-idx c2-2 0)))
+      (try
+        (let [c2-3 (set-idx c2-2 2 3.4)]
+          (println "unreachable" c2-3))
+        (catch Exception e
+          (is (= :invalid-index-access (:type (ex-data e)))))))))
+
 (deftest cayley-dickson-constructions-test
   (testing "Rotation"
     (is (= (quaternion {:a 1.5 :b 1.5 :c 1.5 :d 1.5})
