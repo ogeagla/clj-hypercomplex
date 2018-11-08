@@ -103,12 +103,18 @@
                   :a (.getReal ^Complex cpx-subtract)
                   :b (.getImaginary ^Complex cpx-subtract))))
   (valid-idx? [this idx]
+    "Throws exception when index is invalid.
+    For a Complex2 type, index can only be 0 or 1 (a or b in a+bi)."
     (if-not
       (and
         (contains? #{0 1} idx)
         (:order this))
-      (do (println "C2 Index must be int 0 or 1: " idx)
-          false)
+      (do
+        (throw
+          (ex-info
+            (str "Complex2 Index must be int 0 or 1: " idx)
+            {:type :invalid-index-access}))
+        false)
       true))
 
   (get-idx [this idx]
@@ -170,8 +176,12 @@
       (and
         (contains? #{0 1} idx)
         (:order this))
-      (do (println "C2 Index must be int 0 or 1: " idx)
-          false)
+      (do
+        (throw
+          (ex-info
+            (str "Complex2 Index must be int 0 or 1: " idx)
+            {:type :invalid-index-access}))
+        false)
       true))
 
   (get-idx [this idx]
@@ -204,15 +214,22 @@
   Nion
   (init [this]
     (if-not (eq-order? a b)
-      (println "Orders don't match or missing" a b)
+      (throw
+        (ex-info
+          (str "Orders of a and b must match to init hypercomplex: " a b)
+          {:type :orders-mismatch}))
+
       (assoc this
         :order (* 2 (:order a)))))
   (c [this]
     (assoc this :a (c (:a this))
                 :b (neg (:b this))))
   (times [this other]
-    (if-not (eq-order? a b)
-      (println "Orders don't match or missing" a b)
+    (if-not (eq-order? this other)
+      (throw
+        (ex-info
+          (str "Orders of this and other must match to multiply hypercomplex: " this other)
+          {:type :orders-mismatch}))
       (assoc this :a (minus
                        (times (:a this) (:a other))
                        (times (c (:b other)) (:b this)))
@@ -223,8 +240,11 @@
     (assoc this :a (neg (:a this))
                 :b (neg (:b this))))
   (plus [this other]
-    (if-not (eq-order? a b)
-      (println "Orders don't match or missing" a b)
+    (if-not (eq-order? this other)
+      (throw
+        (ex-info
+          (str "Orders of this and other must match to add hypercomplex: " this other)
+          {:type :orders-mismatch}))
       (assoc this :a (plus (:a this)
                            (:a other))
                   :b (plus (:b this)
@@ -238,10 +258,12 @@
                  (int idx))
               (>= idx 0)
               (<= idx (:order this)))
-      (do (println
-            "Construction Index must be int less than order: "
-            idx (:order this))
-          false)
+      (do
+        (throw
+          (ex-info
+            (str "Construction index must be less than order: " idx (:order this))
+            {:type :invalid-index-access}))
+        false)
       true))
   (get-idx [this idx]
     (when (valid-idx? this idx)
