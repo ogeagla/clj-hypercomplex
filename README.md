@@ -22,15 +22,28 @@ https://en.wikipedia.org/wiki/Cayley%E2%80%93Dickson_construction
 
  - `hypercomplex.core` for operators on or between hypercomplex numbers: `times`, `plus`, `minus`, `neg`, `c` (conjugate), `scale`, `norm`, `inv`, and `mag`.
  - `hypercomplex.cayley-dickson-construction` for constructing hypercomplex numbers: `complex`, `quaternion`, `octonion`, `sedenion`, `pathion`, and `n-hypercomplex` for constructing higher-order algebras of arbitrary order, provided it is a power of 2.
- - All constructions can take an `:impl`, which can be either `:plain`, or `:apache`, which represent either pure Clojure or `org.apache.commons.math3.complex.Complex` implementations to be used under the hood for constructing the hypercomplex numbers.  
+ - All constructions can take an `:impl`, which can be either `:plain`, or `:apache`, which represent either pure Clojure or `org.apache.commons.math3.complex.Complex` implementations to be used under the hood for constructing the hypercomplex numbers.  Hypercomplex numbers with different underlying implementations are not interoperable (TODO).
 
 
-An example of creating `quaternion`, performing multiplication, and checking equality as a result of associativity:
+An example of creating complex numbers, `quaternion`s, performing multiplication, and checking equality as a result of associativity:
 ```clojure
 (:require [hypercomplex.core :refer :all]
           [hypercomplex.cayley-dickson-construction :refer
             [complex quaternion octonion sedenion pathion n-hypercomplex]])
 
+;create a complex number using pure Clojure impl:
+(complex {:a 1.1 :b 2.2 :impl :plain})
+; => #hypercomplex.core.Complex2{:a 1.1, :b 2.2, :order 2}
+
+;create a complex number using Apache Commons Complex2 impl:
+(complex {:a 1.1 :b 2.2 :impl :apache})
+; => #hypercomplex.core.Complex2Apache{:a 1.1, :b 2.2, :order 2, :obj #object[org.apache.commons.math3.complex.Complex 0x3249a1ce (1.1, 2.2)]}
+
+;similar for other hypercomplex numbers:
+(quaternion {:a 1 :b 2 :c 3 :d 4 :impl :plain})
+; => #hypercomplex.core.Construction{:a #hypercomplex.core.Complex2{:a 1, :b 2, :order 2}, :b #hypercomplex.core.Complex2{:a 3, :b 4, :order 2}, :order 4}
+
+;example passing test case:
 (is
   (= (times
        (quaternion {:a 1 :b 2 :c 3 :d 4})

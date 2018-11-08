@@ -5,6 +5,20 @@
              [complex quaternion octonion sedenion pathion]]
             [clojure.pprint :refer :all]))
 
+(defn dissoc-in
+  "Dissociates an entry from a nested associative structure returning a new
+  nested structure. keys is a sequence of keys. Any empty maps that result
+  will not be present in the new structure."
+  [m [k & ks :as keys]]
+  (if ks
+    (if-let [nextmap (get m k)]
+      (let [newmap (dissoc-in nextmap ks)]
+        (if (seq newmap)
+          (assoc m k newmap)
+          (dissoc m k)))
+      m)
+    (dissoc m k)))
+
 (defn fuzzy= [tolerance x y]
   (let [diff (Math/abs (- x y))]
     (< diff tolerance)))
@@ -23,11 +37,28 @@
                (:b (:b q1))
                (:b (:b q2)))))
 
+(defn quaternion-strip-objs [q]
+  "Remove Complex2 instances from quaternion,
+  which breaks equality checking. Impl :plain
+  doesn't have this issue because it uses plain
+  numbers to represent the hypercomplex number args."
+  (->
+    q
+    (dissoc-in [:b :obj])
+    (dissoc-in [:a :obj])
+    (dissoc :obj)))
+
 (deftest quat-math
-  (testing "Product of quaternions"
-    (is (= (quaternion {:a 11 :b -30 :c 25 :d 26})
-           (times (quaternion {:a 1 :b -2 :c 3 :d 2})
-                  (quaternion {:a 11 :b -2 :c 0 :d -2}))))))
+  (testing "Product of quaternions :apache"
+    (is (= (quaternion-strip-objs
+             (quaternion {:a 11.0 :b -30.0 :c 25.0 :d 26.0 :impl :apache}))
+           (quaternion-strip-objs
+             (times (quaternion {:a 1 :b -2 :c 3 :d 2 :impl :apache})
+                    (quaternion {:a 11 :b -2 :c 0 :d -2 :impl :apache}))))))
+  (testing "Product of quaternions :plain"
+    (is (= (quaternion {:a 11 :b -30 :c 25 :d 26 :impl :plain})
+           (times (quaternion {:a 1 :b -2 :c 3 :d 2 :impl :plain})
+                  (quaternion {:a 11 :b -2 :c 0 :d -2 :impl :plain}))))))
 
 (deftest invalid-index
   (testing "Exception is thrown for :apache"
