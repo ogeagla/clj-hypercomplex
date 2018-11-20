@@ -37,11 +37,12 @@
                (:b (:b q1))
                (:b (:b q2)))))
 
-(defn quaternion-strip-objs [q]
+(defn quaternion-strip-objs
   "Remove Complex2 instances from quaternion,
   which breaks equality checking. Impl :plain
   doesn't have this issue because it uses plain
   numbers to represent the hypercomplex number args."
+  [q]
   (->
     q
     (dissoc-in [:b :obj])
