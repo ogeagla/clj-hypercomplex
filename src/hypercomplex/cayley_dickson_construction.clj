@@ -68,15 +68,17 @@
        :impl impl})))
 
 (defn power-of? [number base]
-  (or
-    (= 1 number)
-    (= 1.0 number)
-    (let [log-base-of-number (/
-                               (Math/log number)
-                               (Math/log base))]
-      (zero?
-        (- log-base-of-number
-           (int log-base-of-number))))))
+  (and
+    (not (zero? number))
+    (not (= 1 number))
+    (not (= 1.0 number))
+    (or
+      (let [log-base-of-number (/
+                                 (Math/log number)
+                                 (Math/log base))]
+        (zero?
+          (- log-base-of-number
+             (int log-base-of-number)))))))
 
 (defn n-hypercomplex
   "Provide a power-of-2-sized vector of coefficients

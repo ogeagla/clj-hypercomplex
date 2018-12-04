@@ -30,7 +30,7 @@
 
 (defn- nion-ops-scale [this s]
   (loop [new-this this
-         idx      (dec (:order this))]
+         idx (dec (:order this))]
     (let [new-new-this (set-idx
                          new-this
                          idx
@@ -44,10 +44,11 @@
 (defn- nion-ops-norm [this]
   (loop [sum 0
          idx (dec (:order this))]
-    (let [new-sum (+
-                    sum
-                    (* (get-idx this idx)
-                       (get-idx this idx)))]
+    (let [new-sum (long
+                    (+
+                      sum
+                      (* (get-idx this idx)
+                         (get-idx this idx))))]
       (if (pos? idx)
         (recur new-sum (dec idx))
         new-sum))))
@@ -269,17 +270,17 @@
     (when (valid-idx? this idx)
       (let [half-order (/ (:order this)
                           2)
-            new-idx    (mod idx half-order)
-            retval     (if (< idx half-order)
-                         (get-idx (:a this) new-idx)
-                         (get-idx (:b this) new-idx))]
+            new-idx (mod idx half-order)
+            retval (if (< idx half-order)
+                     (get-idx (:a this) new-idx)
+                     (get-idx (:b this) new-idx))]
         retval)))
 
   (set-idx [this idx new-val]
     (when (valid-idx? this idx)
       (let [half-order (/ (:order this)
                           2)
-            new-idx    (mod idx half-order)]
+            new-idx (mod idx half-order)]
         (if (< idx half-order)
           (update-in this [:a] set-idx new-idx new-val)
           (update-in this [:b] set-idx new-idx new-val)))))

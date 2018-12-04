@@ -8,7 +8,8 @@
                  [jonase/eastwood "0.2.5"]
                  [lein-kibit "0.1.5"]
                  [lein-bikeshed "0.5.0"]]
-  :dependencies [[org.clojure/clojure "1.10.0-beta7"]
+  :dependencies [[org.clojure/clojure "1.10.0-RC3"]
+                 [org.clojure/test.check "0.10.0-alpha3"]
                  [org.apache.commons/commons-math3 "3.6.1"]]
   :main ^:skip-aot hypercomplex.core
   :target-path "target/%s"
