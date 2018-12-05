@@ -1,4 +1,4 @@
-(ns hypercomplex.specs-test
+(ns hypercomplex.gen-test
   (:require
     [clojure.test :refer :all]
     [clojure.spec.alpha :as s]
@@ -12,7 +12,7 @@
      [complex quaternion octonion sedenion pathion n-hypercomplex power-of?]])
   (:import (hypercomplex.core Complex2Apache Complex2 Construction)))
 
-(def MAX-TRIES 1000)
+(def MAX-TRIES 10000)
 (def SEED 12345678987654321)
 
 (defn regular-number? [n]
@@ -25,8 +25,8 @@
 (s/def ::coeff
   (s/with-gen
     #(and
-          (number? %)
-          (regular-number? %))
+       (number? %)
+       (regular-number? %))
     (fn []
       (gen/fmap
         (fn [c]
@@ -70,10 +70,10 @@
           (satisfies? NionOps %))
     (fn []
       (gen/fmap
-        (fn [[coeffs ]]
+        (fn [[coeffs]]
           (n-hypercomplex coeffs :apache))
         (gen/such-that
-          (fn [[coeffs ]]
+          (fn [[coeffs]]
             (and
               (< 1 (count coeffs))
               (power-of? (count coeffs) 2)))
@@ -88,10 +88,10 @@
           (satisfies? NionOps %))
     (fn []
       (gen/fmap
-        (fn [[coeffs ]]
+        (fn [[coeffs]]
           (n-hypercomplex coeffs :plain))
         (gen/such-that
-          (fn [[coeffs ]]
+          (fn [[coeffs]]
             (and
               (< 1 (count coeffs))
               (power-of? (count coeffs) 2)))
@@ -114,7 +114,7 @@
           (gen/tuple
             (s/gen ::hypercomplex-apache)
             (s/gen ::hypercomplex-apache))
-          MAX-TRIES)))) )
+          MAX-TRIES)))))
 
 (s/def ::construction-plain
   (s/with-gen
@@ -131,8 +131,89 @@
           (gen/tuple
             (s/gen ::hypercomplex-plain)
             (s/gen ::hypercomplex-plain))
-          MAX-TRIES)))) )
+          MAX-TRIES)))))
 
+(s/def ::2d-domain
+  (s/with-gen
+    (fn [d]
+      (and (= 2 (count d))
+           (let [[a b] d]
+             (and
+               (<= 0 a 200)
+               (<= 0 b 200)))))
+
+    (fn []
+      (gen/fmap
+        (fn [[a b]]
+          [a b])
+        (gen/such-that
+          (fn [[a b]]
+            (and
+              (<= 0 a 200)
+              (<= 0 b 200)))
+          (gen/tuple
+            (s/gen ::coeff)
+            (s/gen ::coeff))
+          MAX-TRIES)))))
+
+(defn compute-iters [p q impl max-iterations]
+  (let [c (complex {:a p :b q :impl impl})]
+    (loop [z          c
+           iterations 0]
+      ;(println "hc Mandelbrot z: " z)
+      (if (or (> (mag z) 2.0)
+              (> iterations max-iterations))
+        (if (= 0 iterations)
+          0
+          (dec iterations))
+        (recur
+          (plus
+            c
+            (times z z))
+          (inc iterations))))))
+
+
+(s/def ::intensity-apache
+  (s/with-gen
+    (fn [d]
+      (and (= 3 (count d))
+           (let [[a b insy] d]
+             (and
+               (<= 0 insy 200)))))
+
+    (fn []
+      (gen/fmap
+        (fn [[a b]]
+          [a b
+            (compute-iters a b :plain 200)])
+        (s/gen ::2d-domain)))))
+
+;interesting in the sense that it's not 0 and not max-iters,
+;so some value that would render something interesting
+(s/def ::interesting-intensity-apache
+  (s/with-gen
+    (fn [i]
+      (and (< 0 (nth i 2))
+           (> 200 (nth i 2))))
+
+    (fn []
+      (gen/fmap
+        (fn [[i]]
+          i)
+        (gen/such-that
+          (fn [[i]]
+            (and (< 0 (nth i 2))
+                 (> 200 (nth i 2))))
+          (gen/tuple
+            (s/gen ::intensity-apache))
+          MAX-TRIES)))))
+
+(ct/defspec
+  creates-intensity-apache
+  {:num-tests 100 :seed SEED}
+  (prop/for-all [i (s/gen ::interesting-intensity-apache)]
+                (println "intensity: " i)
+                (is (s/valid? ::interesting-intensity-apache i))))
 
 (ct/defspec
   creates-apache2
@@ -172,4 +253,4 @@
                 (is (s/valid? ::construction-plain ca))))
 
 
-(run-tests 'hypercomplex.specs-test)
+;(run-tests 'hypercomplex.gen-test)
