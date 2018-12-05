@@ -15,6 +15,28 @@
 (def MAX-TRIES 1000)
 (def SEED 12345678987654321)
 
+(defn regular-number? [n]
+  (not
+    (or
+      (= n ##-Inf)
+      (= n ##Inf)
+      (= n ##NaN))))
+
+(s/def ::coeff
+  (s/with-gen
+    #(and
+          (number? %)
+          (regular-number? %))
+    (fn []
+      (gen/fmap
+        (fn [c]
+          c)
+        (gen/such-that
+          (fn [c]
+            (regular-number? c))
+          (gen/double)
+          MAX-TRIES)))))
+
 (s/def ::complex2-apache
   (s/with-gen
     #(and (instance? Complex2Apache %)
@@ -24,19 +46,9 @@
       (gen/fmap
         (fn [[a b]]
           (init-complex2 a b :apache))
-        (gen/such-that
-          (fn [[a b]]
-            (not
-              (or
-                (= a ##-Inf)
-                (= a ##Inf)
-                (= b ##-Inf)
-                (= b ##Inf)
-                )))
-          (gen/tuple
-            (gen/double)
-            (gen/double))
-          MAX-TRIES)))))
+        (gen/tuple
+          (s/gen ::coeff)
+          (s/gen ::coeff))))))
 
 (s/def ::complex2-plain
   (s/with-gen
@@ -47,19 +59,9 @@
       (gen/fmap
         (fn [[a b]]
           (init-complex2 a b :plain))
-        (gen/such-that
-          (fn [[a b]]
-            (not
-              (or
-                   (= a ##-Inf)
-                   (= a ##Inf)
-                   (= b ##-Inf)
-                   (= b ##Inf)
-                   )))
-          (gen/tuple
-            (gen/double)
-            (gen/double))
-          MAX-TRIES)))))
+        (gen/tuple
+          (s/gen ::coeff)
+          (s/gen ::coeff))))))
 
 (s/def ::hypercomplex-apache
   (s/with-gen
@@ -72,16 +74,12 @@
           (n-hypercomplex coeffs :apache))
         (gen/such-that
           (fn [[coeffs ]]
+            (println coeffs)
             (and
-              (every? #(not
-                         (or
-                           (= % ##-Inf)
-                           (= % ##Inf)
-                           )) coeffs)
               (not (zero? (count coeffs)))
               (power-of? (count coeffs) 2)))
           (gen/tuple
-            (gen/list (gen/double)))
+            (gen/list (s/gen ::coeff)))
           MAX-TRIES)))))
 
 (s/def ::hypercomplex-plain
@@ -96,15 +94,10 @@
         (gen/such-that
           (fn [[coeffs ]]
             (and
-              (every? #(not
-                         (or
-                           (= % ##-Inf)
-                           (= % ##Inf)
-                           )) coeffs)
               (not (zero? (count coeffs)))
               (power-of? (count coeffs) 2)))
           (gen/tuple
-            (gen/list (gen/double)))
+            (gen/list (s/gen ::coeff)))
           MAX-TRIES)))))
 
 (s/def ::construction-apache
