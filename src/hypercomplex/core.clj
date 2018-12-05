@@ -44,11 +44,10 @@
 (defn- nion-ops-norm [this]
   (loop [sum 0
          idx (dec (:order this))]
-    (let [new-sum (long
-                    (+
-                      sum
-                      (* (get-idx this idx)
-                         (get-idx this idx))))]
+    (let [new-sum (+
+                    sum
+                    (* (get-idx this idx)
+                       (get-idx this idx)))]
       (if (pos? idx)
         (recur new-sum (dec idx))
         new-sum))))
