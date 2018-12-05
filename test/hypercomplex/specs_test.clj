@@ -74,9 +74,8 @@
           (n-hypercomplex coeffs :apache))
         (gen/such-that
           (fn [[coeffs ]]
-            (println coeffs)
             (and
-              (not (zero? (count coeffs)))
+              (< 1 (count coeffs))
               (power-of? (count coeffs) 2)))
           (gen/tuple
             (gen/list (s/gen ::coeff)))
@@ -94,7 +93,7 @@
         (gen/such-that
           (fn [[coeffs ]]
             (and
-              (not (zero? (count coeffs)))
+              (< 1 (count coeffs))
               (power-of? (count coeffs) 2)))
           (gen/tuple
             (gen/list (s/gen ::coeff)))
@@ -162,14 +161,14 @@
   creates-apache-hypercomplex-construction
   {:num-tests 10 :seed SEED}
   (prop/for-all [ca (s/gen ::construction-apache)]
-                (println ca)
+                ;(println ca)
                 (is (s/valid? ::construction-apache ca))))
 
 (ct/defspec
   creates-plain-hypercomplex-construction
   {:num-tests 10 :seed SEED}
   (prop/for-all [ca (s/gen ::construction-plain)]
-                (println ca)
+                ;(println ca)
                 (is (s/valid? ::construction-plain ca))))
 
 

@@ -15,10 +15,10 @@
           po-7? (c/power-of? 9.0 2.0)]
       (is (=
             po-1?
-            false))
+            true))
       (is (=
             po-2?
-            false))
+            true))
       (is (=
             po-3?
             true))
