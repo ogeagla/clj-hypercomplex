@@ -26,7 +26,13 @@
           (init-complex2 a b :apache))
         (gen/such-that
           (fn [[a b]]
-            true)
+            (not
+              (or
+                (= a ##-Inf)
+                (= a ##Inf)
+                (= b ##-Inf)
+                (= b ##Inf)
+                )))
           (gen/tuple
             (gen/double)
             (gen/double))
@@ -43,7 +49,13 @@
           (init-complex2 a b :plain))
         (gen/such-that
           (fn [[a b]]
-            true)
+            (not
+              (or
+                   (= a ##-Inf)
+                   (= a ##Inf)
+                   (= b ##-Inf)
+                   (= b ##Inf)
+                   )))
           (gen/tuple
             (gen/double)
             (gen/double))
@@ -61,6 +73,11 @@
         (gen/such-that
           (fn [[coeffs ]]
             (and
+              (every? #(not
+                         (or
+                           (= % ##-Inf)
+                           (= % ##Inf)
+                           )) coeffs)
               (not (zero? (count coeffs)))
               (power-of? (count coeffs) 2)))
           (gen/tuple
@@ -79,6 +96,11 @@
         (gen/such-that
           (fn [[coeffs ]]
             (and
+              (every? #(not
+                         (or
+                           (= % ##-Inf)
+                           (= % ##Inf)
+                           )) coeffs)
               (not (zero? (count coeffs)))
               (power-of? (count coeffs) 2)))
           (gen/tuple
@@ -96,7 +118,6 @@
           (init-construction a b))
         (gen/such-that
           (fn [[a b]]
-            (println "ca order: " (:order a) (:order b))
             (eq-order? a b))
           (gen/tuple
             (s/gen ::hypercomplex-apache)
@@ -114,7 +135,6 @@
           (init-construction a b))
         (gen/such-that
           (fn [[a b]]
-            (println "ca order: " (:order a) (:order b))
             (eq-order? a b))
           (gen/tuple
             (s/gen ::hypercomplex-plain)
@@ -126,27 +146,23 @@
   creates-apache2
   {:num-tests 10 :seed SEED}
   (prop/for-all [c2a (s/gen ::complex2-apache)]
-                (println c2a)
                 (is (s/valid? ::complex2-apache c2a))))
 
 (ct/defspec
   creates-plain2
   {:num-tests 10 :seed SEED}
   (prop/for-all [c2p (s/gen ::complex2-plain)]
-                (println c2p)
                 (is (s/valid? ::complex2-plain c2p))))
 
 (ct/defspec
   creates-apache-hypercomplex
   {:num-tests 10 :seed SEED}
   (prop/for-all [ha (s/gen ::hypercomplex-apache)]
-                (println ha)
                 (is (s/valid? ::hypercomplex-apache ha))))
 (ct/defspec
   creates-plain-hypercomplex
   {:num-tests 10 :seed SEED}
   (prop/for-all [ha (s/gen ::hypercomplex-plain)]
-                (println ha)
                 (is (s/valid? ::hypercomplex-plain ha))))
 
 (ct/defspec
