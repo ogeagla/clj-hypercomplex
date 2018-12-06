@@ -123,10 +123,10 @@
 
 ;;;; Generate fractals:
 
-(def XY-RANGE [-2.0 0.5])
-(def X-RANGE [-0.4 0.2])
-(def Y-RANGE [-1.1 -0.5])
-(def MAX-CONV-ITERS 64)
+(def XY-RANGE* (atom [-2.0 0.5]))
+(def X-RANGE* (atom [-0.4 0.2]))
+(def Y-RANGE* (atom [-1.1 -0.5]))
+(def MAX-CONV-ITERS* (atom 64))
 
 
 (defn regular-number? [n domain]
@@ -142,37 +142,37 @@
   (s/with-gen
     #(and
        (number? %)
-       (regular-number? % Y-RANGE))
+       (regular-number? % @Y-RANGE*))
     (fn []
       (gen/double*
         {:infinite? false
          :NaN?      false
-         :min       (first Y-RANGE)
-         :max       (second Y-RANGE)}))))
+         :min       (first @Y-RANGE*)
+         :max       (second @Y-RANGE*)}))))
 
 (s/def ::xcoeff
   (s/with-gen
     #(and
        (number? %)
-       (regular-number? % X-RANGE))
+       (regular-number? % @X-RANGE*))
     (fn []
       (gen/double*
         {:infinite? false
          :NaN?      false
-         :min       (first X-RANGE)
-         :max       (second X-RANGE)}))))
+         :min       (first @X-RANGE*)
+         :max       (second @X-RANGE*)}))))
 
 (s/def ::coeff
   (s/with-gen
     #(and
        (number? %)
-       (regular-number? % XY-RANGE))
+       (regular-number? % @XY-RANGE*))
     (fn []
       (gen/double*
         {:infinite? false
          :NaN?      false
-         :min       (first XY-RANGE)
-         :max       (second XY-RANGE)}))))
+         :min       (first @XY-RANGE*)
+         :max       (second @XY-RANGE*)}))))
 
 (s/def ::2d-domain
   (s/with-gen
@@ -206,12 +206,12 @@
       (and (= 3 (count d))
            (let [[a b insy] d]
              (and
-               (<= 0 insy MAX-CONV-ITERS)))))
+               (<= 0 insy @MAX-CONV-ITERS*)))))
     (fn []
       (gen/fmap
         (fn [[a b]]
           [a b
-           (compute-iters a b :plain MAX-CONV-ITERS)])
+           (compute-iters a b :plain @MAX-CONV-ITERS*)])
         (s/gen ::2d-domain)))))
 
 ;interesting in the sense that it's not 0 and not max-iters,
@@ -220,12 +220,12 @@
   (s/with-gen
     (fn [i]
       (and (< 0 (nth i 2))
-           (> MAX-CONV-ITERS (nth i 2))))
+           (> @MAX-CONV-ITERS* (nth i 2))))
     (fn []
       (gen/such-that
         (fn [i]
           (and (< 0 (nth i 2))
-               (> MAX-CONV-ITERS (nth i 2))))
+               (> @MAX-CONV-ITERS* (nth i 2))))
         (s/gen ::intensity-plain)
         MAX-TRIES))))
 
