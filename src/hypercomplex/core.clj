@@ -42,7 +42,7 @@
         new-new-this))))
 
 (defn- nion-ops-norm [this]
-  (loop [sum 0
+  (loop [sum 0.0
          idx (dec (:order this))]
     (let [new-sum (+
                     sum

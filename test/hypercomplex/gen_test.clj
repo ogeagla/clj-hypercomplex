@@ -15,27 +15,6 @@
 (def MAX-TRIES 10000)
 (def SEED 12345678987654321)
 
-(defn regular-number? [n]
-  (not
-    (or
-      (= n ##-Inf)
-      (= n ##Inf)
-      (= n ##NaN))))
-
-(s/def ::coeff
-  (s/with-gen
-    #(and
-       (number? %)
-       (regular-number? %))
-    (fn []
-      (gen/fmap
-        (fn [c]
-          c)
-        (gen/such-that
-          (fn [c]
-            (regular-number? c))
-          (gen/double)
-          MAX-TRIES)))))
 
 (s/def ::complex2-apache
   (s/with-gen
@@ -70,15 +49,14 @@
           (satisfies? NionOps %))
     (fn []
       (gen/fmap
-        (fn [[coeffs]]
+        (fn [coeffs]
           (n-hypercomplex coeffs :apache))
         (gen/such-that
-          (fn [[coeffs]]
+          (fn [coeffs]
             (and
               (< 1 (count coeffs))
               (power-of? (count coeffs) 2)))
-          (gen/tuple
-            (gen/list (s/gen ::coeff)))
+          (gen/list (s/gen ::coeff))
           MAX-TRIES)))))
 
 (s/def ::hypercomplex-plain
@@ -88,15 +66,14 @@
           (satisfies? NionOps %))
     (fn []
       (gen/fmap
-        (fn [[coeffs]]
+        (fn [coeffs]
           (n-hypercomplex coeffs :plain))
         (gen/such-that
-          (fn [[coeffs]]
+          (fn [coeffs]
             (and
               (< 1 (count coeffs))
               (power-of? (count coeffs) 2)))
-          (gen/tuple
-            (gen/list (s/gen ::coeff)))
+          (gen/list (s/gen ::coeff))
           MAX-TRIES)))))
 
 (s/def ::construction-apache
@@ -133,28 +110,43 @@
             (s/gen ::hypercomplex-plain))
           MAX-TRIES)))))
 
+
+
+;;;; Generate fractals:
+
+(def xy-range [-10.0 10.0])
+(def max-f-iters 200)
+
+
+(defn regular-number? [n]
+  (and
+    (<= (first xy-range) n (second xy-range))
+    (not
+      (or
+        (= n ##-Inf)
+        (= n ##Inf)
+        (= n ##NaN)))))
+
+(s/def ::coeff
+  (s/with-gen
+    #(and
+       (number? %)
+       (regular-number? %))
+    (fn []
+      (gen/double*
+        {:infinite? false
+         :NaN?      false
+         :min       (first xy-range)
+         :max       (second xy-range)}))))
+
 (s/def ::2d-domain
   (s/with-gen
     (fn [d]
-      (and (= 2 (count d))
-           (let [[a b] d]
-             (and
-               (<= 0 a 200)
-               (<= 0 b 200)))))
-
+      (= 2 (count d)))
     (fn []
-      (gen/fmap
-        (fn [[a b]]
-          [a b])
-        (gen/such-that
-          (fn [[a b]]
-            (and
-              (<= 0 a 200)
-              (<= 0 b 200)))
-          (gen/tuple
-            (s/gen ::coeff)
-            (s/gen ::coeff))
-          MAX-TRIES)))))
+      (gen/tuple
+        (s/gen ::coeff)
+        (s/gen ::coeff)))))
 
 (defn compute-iters [p q impl max-iterations]
   (let [c (complex {:a p :b q :impl impl})]
@@ -179,13 +171,12 @@
       (and (= 3 (count d))
            (let [[a b insy] d]
              (and
-               (<= 0 insy 200)))))
-
+               (<= 0 insy max-f-iters)))))
     (fn []
       (gen/fmap
         (fn [[a b]]
           [a b
-            (compute-iters a b :plain 200)])
+           (compute-iters a b :plain max-f-iters)])
         (s/gen ::2d-domain)))))
 
 ;interesting in the sense that it's not 0 and not max-iters,
@@ -194,26 +185,14 @@
   (s/with-gen
     (fn [i]
       (and (< 0 (nth i 2))
-           (> 200 (nth i 2))))
-
+           (> max-f-iters (nth i 2))))
     (fn []
-      (gen/fmap
-        (fn [[i]]
-          i)
-        (gen/such-that
-          (fn [[i]]
-            (and (< 0 (nth i 2))
-                 (> 200 (nth i 2))))
-          (gen/tuple
-            (s/gen ::intensity-apache))
-          MAX-TRIES)))))
-
-(ct/defspec
-  creates-intensity-apache
-  {:num-tests 100 :seed SEED}
-  (prop/for-all [i (s/gen ::interesting-intensity-apache)]
-                (println "intensity: " i)
-                (is (s/valid? ::interesting-intensity-apache i))))
+      (gen/such-that
+        (fn [i]
+          (and (< 0 (nth i 2))
+               (> max-f-iters (nth i 2))))
+        (s/gen ::intensity-apache)
+        MAX-TRIES))))
 
 (ct/defspec
   creates-apache2
@@ -252,5 +231,11 @@
                 ;(println ca)
                 (is (s/valid? ::construction-plain ca))))
 
+(ct/defspec
+  creates-intensity-apache
+  {:num-tests 50 :seed SEED}
+  (prop/for-all [i (s/gen ::interesting-intensity-apache)]
+                (println "intensity: " i)
+                (is (s/valid? ::interesting-intensity-apache i))))
 
-;(run-tests 'hypercomplex.gen-test)
+(run-tests 'hypercomplex.gen-test)
