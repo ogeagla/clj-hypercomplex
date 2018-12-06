@@ -59,9 +59,11 @@
         (gen/such-that
           (fn [coeffs]
             (and
-              (< 1 (count coeffs))
               (power-of? (count coeffs) 2)))
-          (gen/list (s/gen ::coeff))
+          (gen/vector-distinct
+            (s/gen ::coeff)
+            {:min-elements 2
+             :max-elements 256})
           MAX-TRIES)))))
 
 (s/def ::hypercomplex-plain
@@ -76,9 +78,11 @@
         (gen/such-that
           (fn [coeffs]
             (and
-              (< 1 (count coeffs))
               (power-of? (count coeffs) 2)))
-          (gen/list (s/gen ::coeff))
+          (gen/vector-distinct
+            (s/gen ::coeff)
+            {:min-elements 2
+             :max-elements 256})
           MAX-TRIES)))))
 
 (s/def ::construction-apache
@@ -119,30 +123,56 @@
 
 ;;;; Generate fractals:
 
-(def xy-range [-2.0 0.5])
-(def max-f-iters 64)
+(def XY-RANGE [-2.0 0.5])
+(def X-RANGE [-0.4 0.2])
+(def Y-RANGE [-1.1 -0.5])
+(def MAX-CONV-ITERS 64)
 
 
-(defn regular-number? [n]
+(defn regular-number? [n domain]
   (and
-    (<= (first xy-range) n (second xy-range))
+    (<= (first domain) n (second domain))
     (not
       (or
         (= n ##-Inf)
         (= n ##Inf)
         (= n ##NaN)))))
 
-(s/def ::coeff
+(s/def ::ycoeff
   (s/with-gen
     #(and
        (number? %)
-       (regular-number? %))
+       (regular-number? % Y-RANGE))
     (fn []
       (gen/double*
         {:infinite? false
          :NaN?      false
-         :min       (first xy-range)
-         :max       (second xy-range)}))))
+         :min       (first Y-RANGE)
+         :max       (second Y-RANGE)}))))
+
+(s/def ::xcoeff
+  (s/with-gen
+    #(and
+       (number? %)
+       (regular-number? % X-RANGE))
+    (fn []
+      (gen/double*
+        {:infinite? false
+         :NaN?      false
+         :min       (first X-RANGE)
+         :max       (second X-RANGE)}))))
+
+(s/def ::coeff
+  (s/with-gen
+    #(and
+       (number? %)
+       (regular-number? % XY-RANGE))
+    (fn []
+      (gen/double*
+        {:infinite? false
+         :NaN?      false
+         :min       (first XY-RANGE)
+         :max       (second XY-RANGE)}))))
 
 (s/def ::2d-domain
   (s/with-gen
@@ -150,8 +180,8 @@
       (= 2 (count d)))
     (fn []
       (gen/tuple
-        (s/gen ::coeff)
-        (s/gen ::coeff)))))
+        (s/gen ::xcoeff)
+        (s/gen ::ycoeff)))))
 
 (defn compute-iters [p q impl max-iterations]
   (let [c (complex {:a p :b q :impl impl})]
@@ -170,42 +200,42 @@
           (inc iterations))))))
 
 
-(s/def ::intensity-apache
+(s/def ::intensity-plain
   (s/with-gen
     (fn [d]
       (and (= 3 (count d))
            (let [[a b insy] d]
              (and
-               (<= 0 insy max-f-iters)))))
+               (<= 0 insy MAX-CONV-ITERS)))))
     (fn []
       (gen/fmap
         (fn [[a b]]
           [a b
-           (compute-iters a b :plain max-f-iters)])
+           (compute-iters a b :plain MAX-CONV-ITERS)])
         (s/gen ::2d-domain)))))
 
 ;interesting in the sense that it's not 0 and not max-iters,
 ;so some value that would render something interesting
-(s/def ::interesting-intensity-apache
+(s/def ::interesting-intensity-plain
   (s/with-gen
     (fn [i]
       (and (< 0 (nth i 2))
-           (> max-f-iters (nth i 2))))
+           (> MAX-CONV-ITERS (nth i 2))))
     (fn []
       (gen/such-that
         (fn [i]
           (and (< 0 (nth i 2))
-               (> max-f-iters (nth i 2))))
-        (s/gen ::intensity-apache)
+               (> MAX-CONV-ITERS (nth i 2))))
+        (s/gen ::intensity-plain)
         MAX-TRIES))))
 
-(s/def ::interesting-intensities-apache
+(s/def ::interesting-intensities-plain
   (s/with-gen
     (fn [i]
       (coll? i))
     (fn []
       (gen/vector-distinct
-        (s/gen ::interesting-intensity-apache)
+        (s/gen ::interesting-intensity-plain)
         {:num-elements 100}))))
 
 
@@ -247,20 +277,18 @@
                 (is (s/valid? ::construction-plain ca))))
 
 (ct/defspec
-  creates-intensity-apache
+  creates-plain-intensity
   {:num-tests 10 :seed SEED}
-  (prop/for-all [i (s/gen ::interesting-intensity-apache)]
-                (is (s/valid? ::interesting-intensity-apache i))))
+  (prop/for-all [i (s/gen ::interesting-intensity-plain)]
+                (is (s/valid? ::interesting-intensity-plain i))))
 
 (ct/defspec
-  creates-intensities-apache
+  creates-plain-intensities
   {:num-tests 10 :seed SEED}
   (prop/for-all
-    [its (s/gen ::interesting-intensities-apache)]
+    [its (s/gen ::interesting-intensities-plain)]
     ;(println "Intensities count: " (count its))
-    (is (s/valid? ::interesting-intensities-apache its))
-    ))
-
+    (is (s/valid? ::interesting-intensities-plain its))))
 
 
 ;(run-tests 'hypercomplex.gen-test)
