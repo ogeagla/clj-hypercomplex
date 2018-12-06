@@ -10,7 +10,9 @@
                  [lein-bikeshed "0.5.0"]]
   :dependencies [[org.clojure/clojure "1.10.0-RC3"]
                  [org.clojure/test.check "0.10.0-alpha3"]
-                 [org.apache.commons/commons-math3 "3.6.1"]]
+                 [org.apache.commons/commons-math3 "3.6.1"]
+                 [me.raynes/fs "1.4.6"]
+                 [net.mikera/imagez "0.12.0"]]
   :main ^:skip-aot hypercomplex.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

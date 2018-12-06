@@ -9,8 +9,13 @@
     [clojure.test.check.generators :as g]
     [hypercomplex.core :refer :all]
     [hypercomplex.cayley-dickson-construction :refer
-     [complex quaternion octonion sedenion pathion n-hypercomplex power-of?]])
-  (:import (hypercomplex.core Complex2Apache Complex2 Construction)))
+     [complex quaternion octonion sedenion
+      pathion n-hypercomplex power-of?]]
+    [mikera.image.core :as imgz]
+    [mikera.image.colours :as imgz-color])
+  (:import (hypercomplex.core Complex2Apache Complex2 Construction)
+           (java.awt.image BufferedImage WritableRaster)
+           (java.awt Graphics)))
 
 (def MAX-TRIES 10000)
 (def SEED 12345678987654321)
@@ -114,8 +119,8 @@
 
 ;;;; Generate fractals:
 
-(def xy-range [-10.0 10.0])
-(def max-f-iters 200)
+(def xy-range [-2.0 0.5])
+(def max-f-iters 64)
 
 
 (defn regular-number? [n]
@@ -194,6 +199,16 @@
         (s/gen ::intensity-apache)
         MAX-TRIES))))
 
+(s/def ::interesting-intensities-apache
+  (s/with-gen
+    (fn [i]
+      (coll? i))
+    (fn []
+      (gen/vector-distinct
+        (s/gen ::interesting-intensity-apache)
+        {:num-elements 100}))))
+
+
 (ct/defspec
   creates-apache2
   {:num-tests 10 :seed SEED}
@@ -233,9 +248,19 @@
 
 (ct/defspec
   creates-intensity-apache
-  {:num-tests 50 :seed SEED}
+  {:num-tests 10 :seed SEED}
   (prop/for-all [i (s/gen ::interesting-intensity-apache)]
-                (println "intensity: " i)
                 (is (s/valid? ::interesting-intensity-apache i))))
 
-(run-tests 'hypercomplex.gen-test)
+(ct/defspec
+  creates-intensities-apache
+  {:num-tests 10 :seed SEED}
+  (prop/for-all
+    [its (s/gen ::interesting-intensities-apache)]
+    ;(println "Intensities count: " (count its))
+    (is (s/valid? ::interesting-intensities-apache its))
+    ))
+
+
+
+;(run-tests 'hypercomplex.gen-test)
