@@ -220,12 +220,12 @@
   (s/with-gen
     (fn [i]
       (and (< 0 (nth i 2))
-           (> @MAX-CONV-ITERS* (nth i 2))))
+           #_(> @MAX-CONV-ITERS* (nth i 2))))
     (fn []
       (gen/such-that
         (fn [i]
           (and (< 0 (nth i 2))
-               (> @MAX-CONV-ITERS* (nth i 2))))
+               #_(> @MAX-CONV-ITERS* (nth i 2))))
         (s/gen ::intensity-plain)
         MAX-TRIES))))
 
