@@ -17,6 +17,10 @@
            (java.awt.image BufferedImage WritableRaster)
            (java.awt Graphics)))
 
+
+(set! *unchecked-math* true)
+(set! *warn-on-reflection* true)
+
 (def MAX-TRIES 10000)
 (def SEED 12345678987654321)
 
@@ -138,17 +142,30 @@
         (= n ##Inf)
         (= n ##NaN)))))
 
+(def SCALE 100000)
+
+(defn i->x [i imax range]
+  (let [dr (apply - (reverse range))
+        ri (/ i imax)]
+    (+
+      (first range)
+      (* ri dr))))
+
+;This doesn't sample uniformly at all
+(s/def ::int-in
+  (s/int-in 0 (inc SCALE)))
+
+
 (s/def ::ycoeff
   (s/with-gen
     #(and
        (number? %)
        (regular-number? % @Y-RANGE*))
     (fn []
-      (gen/double*
-        {:infinite? false
-         :NaN?      false
-         :min       (first @Y-RANGE*)
-         :max       (second @Y-RANGE*)}))))
+      (gen/fmap
+        (fn [i]
+          (i->x (rand-int (inc SCALE)) SCALE @Y-RANGE*))
+        (gen/int)))))
 
 (s/def ::xcoeff
   (s/with-gen
@@ -156,11 +173,10 @@
        (number? %)
        (regular-number? % @X-RANGE*))
     (fn []
-      (gen/double*
-        {:infinite? false
-         :NaN?      false
-         :min       (first @X-RANGE*)
-         :max       (second @X-RANGE*)}))))
+      (gen/fmap
+        (fn [i]
+          (i->x (rand-int (inc SCALE)) SCALE @X-RANGE*))
+        (gen/int)))))
 
 (s/def ::coeff
   (s/with-gen
@@ -168,11 +184,10 @@
        (number? %)
        (regular-number? % @XY-RANGE*))
     (fn []
-      (gen/double*
-        {:infinite? false
-         :NaN?      false
-         :min       (first @XY-RANGE*)
-         :max       (second @XY-RANGE*)}))))
+      (gen/fmap
+        (fn [i]
+          (i->x (rand-int 10000) 10000 @XY-RANGE*))
+        (gen/int)))))
 
 (s/def ::2d-domain
   (s/with-gen
