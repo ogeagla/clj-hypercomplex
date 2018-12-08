@@ -198,7 +198,7 @@
         (s/gen ::xcoeff)
         (s/gen ::ycoeff)))))
 
-(defn compute-iters [p q impl max-iterations]
+(defn compute-iters-mandel [p q impl max-iterations]
   (let [c (complex {:a p :b q :impl impl})]
     (loop [z          c
            iterations 0]
@@ -214,8 +214,27 @@
             (times z z))
           (inc iterations))))))
 
+(def JULIA-COEFF-PLAIN* (atom (complex {:a -0.1 :b 0.7 :impl :plain})))
 
-(s/def ::intensity-plain
+(defn compute-iters-julia [p q impl max-iterations]
+  (let [c           (complex {:a p :b q :impl impl})
+        julia-coeff @JULIA-COEFF-PLAIN*]
+    (loop [z          c
+           iterations 0]
+      ;(println "hc Mandelbrot z: " z)
+      (if (or (> (mag z) 2.0)
+              (> iterations max-iterations))
+        (if (= 0 iterations)
+          0
+          (dec iterations))
+        (recur
+          (plus
+            julia-coeff
+            (times z z))
+          (inc iterations))))))
+
+;Julia
+(s/def ::intensity-plain-julia
   (s/with-gen
     (fn [d]
       (and (= 3 (count d))
@@ -226,12 +245,12 @@
       (gen/fmap
         (fn [[a b]]
           [a b
-           (compute-iters a b :plain @MAX-CONV-ITERS*)])
+           (compute-iters-julia a b :plain @MAX-CONV-ITERS*)])
         (s/gen ::2d-domain)))))
 
 ;interesting in the sense that it's not 0 and not max-iters,
 ;so some value that would render something interesting
-(s/def ::interesting-intensity-plain
+(s/def ::interesting-intensity-plain-julia
   (s/with-gen
     (fn [i]
       (and (< 0 (nth i 2))
@@ -241,17 +260,59 @@
         (fn [i]
           (and (< 0 (nth i 2))
                #_(> @MAX-CONV-ITERS* (nth i 2))))
-        (s/gen ::intensity-plain)
+        (s/gen ::intensity-plain-julia)
         MAX-TRIES))))
 
-(s/def ::interesting-intensities-plain
+(s/def ::interesting-intensities-plain-julia
   (s/with-gen
     (fn [i]
       (coll? i))
     (fn []
       (gen/vector-distinct
-        (s/gen ::interesting-intensity-plain)
+        (s/gen ::interesting-intensity-plain-julia)
         {:num-elements 100}))))
+
+;Mandelbrot
+
+(s/def ::intensity-plain-mandel
+  (s/with-gen
+    (fn [d]
+      (and (= 3 (count d))
+           (let [[a b insy] d]
+             (and
+               (<= 0 insy @MAX-CONV-ITERS*)))))
+    (fn []
+      (gen/fmap
+        (fn [[a b]]
+          [a b
+           (compute-iters-mandel a b :plain @MAX-CONV-ITERS*)])
+        (s/gen ::2d-domain)))))
+
+;interesting in the sense that it's not 0 and not max-iters,
+;so some value that would render something interesting
+(s/def ::interesting-intensity-plain-mandel
+  (s/with-gen
+    (fn [i]
+      (and (< 0 (nth i 2))
+           #_(> @MAX-CONV-ITERS* (nth i 2))))
+    (fn []
+      (gen/such-that
+        (fn [i]
+          (and (< 0 (nth i 2))
+               #_(> @MAX-CONV-ITERS* (nth i 2))))
+        (s/gen ::intensity-plain-mandel)
+        MAX-TRIES))))
+
+(s/def ::interesting-intensities-plain-mandel
+  (s/with-gen
+    (fn [i]
+      (coll? i))
+    (fn []
+      (gen/vector-distinct
+        (s/gen ::interesting-intensity-plain-mandel)
+        {:num-elements 100}))))
+
+
 
 
 (ct/defspec
@@ -292,18 +353,32 @@
                 (is (s/valid? ::construction-plain ca))))
 
 (ct/defspec
-  creates-plain-intensity
+  creates-plain-intensity-julia
   {:num-tests 10 :seed SEED}
-  (prop/for-all [i (s/gen ::interesting-intensity-plain)]
-                (is (s/valid? ::interesting-intensity-plain i))))
+  (prop/for-all [i (s/gen ::interesting-intensity-plain-julia)]
+                (is (s/valid? ::interesting-intensity-plain-julia i))))
 
 (ct/defspec
-  creates-plain-intensities
+  creates-plain-intensities-julia
   {:num-tests 10 :seed SEED}
   (prop/for-all
-    [its (s/gen ::interesting-intensities-plain)]
+    [its (s/gen ::interesting-intensities-plain-julia)]
     ;(println "Intensities count: " (count its))
-    (is (s/valid? ::interesting-intensities-plain its))))
+    (is (s/valid? ::interesting-intensities-plain-julia its))))
+
+(ct/defspec
+  creates-plain-intensity-julia
+  {:num-tests 10 :seed SEED}
+  (prop/for-all [i (s/gen ::interesting-intensity-plain-julia)]
+                (is (s/valid? ::interesting-intensity-plain-julia i))))
+
+(ct/defspec
+  creates-plain-intensities-julia
+  {:num-tests 10 :seed SEED}
+  (prop/for-all
+    [its (s/gen ::interesting-intensities-plain-julia)]
+    ;(println "Intensities count: " (count its))
+    (is (s/valid? ::interesting-intensities-plain-julia its))))
 
 
 ;(run-tests 'hypercomplex.gen-test)
