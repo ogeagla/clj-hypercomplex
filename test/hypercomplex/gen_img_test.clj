@@ -1,10 +1,12 @@
 (ns hypercomplex.gen-img-test
   (:require [clojure.test :refer :all]
+            [clojure.java.shell :refer [sh]]
             [mikera.image.core :as imgz]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [hypercomplex.gen-test :as gt]
-            [hypercomplex.cayley-dickson-construction :as c])
+            [hypercomplex.cayley-dickson-construction :as c]
+            [me.raynes.fs :as fs])
   (:import (java.awt.image BufferedImage WritableRaster)
            (java.awt Graphics Color)))
 
@@ -415,10 +417,18 @@
     (map domains)
     (mapcat identity)))
 
+(defn animate-results [glob output]
+  (println "Creating animated gif from files, to file: " glob " -> " output)
+  (try
+    (sh "convert" "-delay" "25" "-loop" "0" glob output)
+    (catch Throwable t
+      (println "Could not create animated gif:" t))))
+
 (deftest gen-img-test
   (testing "Generates fractal image"
     (println "Generating frac")
-    (let [fconfig      :c12
+    (let [dir          (str "gen-img-test/test-" (System/currentTimeMillis))
+          fconfig      :c12
           rconfig      :medium
 
           {:keys [type multidom]
@@ -439,6 +449,8 @@
                          ;;
                          ;;
                          :mandel :TODO)]
+      (if-not (fs/exists? dir)
+        (fs/mkdir dir))
       (doseq [[xrange yrange iters julia-coeff] domans]
         (println "Domain, iters, size : " xrange yrange iters test-size)
         (when julia-coeff
@@ -446,22 +458,27 @@
         (reset! gt/X-RANGE* xrange)
         (reset! gt/Y-RANGE* yrange)
         (reset! gt/MAX-CONV-ITERS* iters)
-        (let [image (BufferedImage.
-                      img-w
-                      img-h
-                      BufferedImage/TYPE_INT_ARGB)
-              its   (pgen-spec
-                      (s/gen
-                        f-spec)
-                      test-size)
-              imgf  (str "gen-img-test/gen-img-test-"
-                         (name type) "-" (name fconfig) "-" (name rconfig) "-i" iters "-"
-                         (System/currentTimeMillis) "-" test-size
-                         "-x-" (first xrange) "-" (second xrange)
-                         "-y-" (first yrange) "-" (second yrange) ".png")]
+        (let [image    (BufferedImage.
+                         img-w
+                         img-h
+                         BufferedImage/TYPE_INT_ARGB)
+              its      (pgen-spec
+                         (s/gen
+                           f-spec)
+                         test-size)
+              filetime (System/currentTimeMillis)
+              imgf     (str dir "/gen-img-test-"
+                            (name type) "-" (name fconfig) "-" (name rconfig) "-i" iters "-"
+                            filetime "-" test-size
+                            "-x-" (first xrange) "-" (second xrange)
+                            "-y-" (first yrange) "-" (second yrange) ".png")]
           (draw-intensities-w-raster its image img-w img-h)
           ;(imgz/show image)
           (imgz/save (img-scale-fn image) imgf)
-          (println "Wrote: " imgf))))))
+          (println "Wrote: " imgf)
+          (animate-results (str dir "/*.png")
+                           (str dir "/fractal-part-" filetime ".gif"))))
+      (animate-results (str dir "/*.png")
+                       (str dir "/fractal-all.gif")))))
 
 (run-tests 'hypercomplex.gen-img-test)
