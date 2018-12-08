@@ -108,6 +108,57 @@
     (> w 0.000001) 270
     :else 300))
 
+(defn complex-between-pct [c1 c2 pct]
+  (c/complex
+    {:a    (+ (:a c1) (* pct (- (:a c2) (:a c1))))
+     :b    (+ (:b c1) (* pct (- (:b c2) (:b c1))))
+     :impl :plain}))
+
+(defn domains
+  [{:keys [views type wf hf w0 h0 x0 y0 xf yf julia-coeff0 julia-coefff iter-scale]
+    :or   {iter-scale 1.0}
+    :as   d}]
+  (->>
+    (range views -1 -1)
+    (map
+      (fn [i]
+        (let [width-range  (- w0 wf)
+              height-range (- h0 hf)
+              pct-desc     (/ i views)
+              pct-asc      (- 1.0 pct-desc)
+              dx           (* pct-asc (- xf x0))
+              dy           (* pct-asc (- yf y0))
+              dw           (+ (/ wf 2) (* pct-desc (/ width-range 2)))
+              dh           (+ (/ hf 2) (* pct-desc (/ height-range 2)))]
+          [[(+ (- x0 dw) dx)
+            (+ x0 dw dx)]
+           [(+ (- y0 dh) dy)
+            (+ y0 dh dy)]
+           (int (* iter-scale (width->iters (* 2 dw))))
+           (when (= :julia type)
+             (complex-between-pct julia-coeff0 julia-coefff pct-asc))])))))
+
+(defn combine-domains [ds views]
+  (->>
+    ds
+    (map #(assoc % :views views))
+    (map domains)
+    (mapcat identity)))
+
+(defn animate-results-gif [glob output]
+  (println "Creating animated gif from files, to file: " glob " -> " output)
+  (try
+    (sh "convert" " -dispose" "2" "-delay" "7" "-loop" "0" glob output)
+    (catch Throwable t
+      (println "Could not create animated gif:" t))))
+
+(defn animate-results-ffmpeg [imgdir output]
+  (println "Creating animated mp4 from files, to file: " imgdir " -> " output)
+  (try
+    (sh "ffmpeg" "-framerate" "6" "-i"
+        (str imgdir "/img-%04d.png") "-c:v" "libx264" "-r" "30"
+        output)))
+
 (def fractal-config
   {
    ;Moves, zooms, on Mandelbrot
@@ -258,7 +309,7 @@
 
    :c11 {:type :julia
          :multidom
-               [{:iter-scale   1.0
+               [{:iter-scale   2.0
                  :x0           0.0
                  :y0           0.0
                  :xf           0.0
@@ -270,7 +321,7 @@
                  :type         :julia
                  :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
                  :julia-coefff (c/complex {:a 0.1 :b -0.7 :impl :plain})}
-                {:iter-scale   1.0
+                {:iter-scale   2.0
                  :x0           0.0
                  :y0           0.0
                  :xf           0.0
@@ -289,10 +340,10 @@
                  :y0           0.0
                  :xf           0.0
                  :yf           0.0
-                 :w0           4.0
-                 :wf           4.0
-                 :h0           4.0
-                 :hf           4.0
+                 :w0           3.5
+                 :wf           3.5
+                 :h0           3.5
+                 :hf           3.5
                  :type         :julia
                  :julia-coeff0 (c/complex {:a 0.0 :b -0.7 :impl :plain})
                  :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
@@ -301,10 +352,10 @@
                  :y0           0.0
                  :xf           0.0
                  :yf           0.0
-                 :w0           4.0
-                 :wf           4.0
-                 :h0           4.0
-                 :hf           4.0
+                 :w0           3.5
+                 :wf           3.5
+                 :h0           3.5
+                 :hf           3.5
                  :type         :julia
                  :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
                  :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
@@ -313,10 +364,10 @@
                  :y0           0.0
                  :xf           0.0
                  :yf           0.0
-                 :w0           4.0
-                 :wf           4.0
-                 :h0           4.0
-                 :hf           4.0
+                 :w0           3.5
+                 :wf           3.5
+                 :h0           3.5
+                 :hf           3.5
                  :type         :julia
                  :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
                  :julia-coefff (c/complex {:a 0.0 :b 0.7 :impl :plain})}
@@ -325,10 +376,10 @@
                  :y0           0.0
                  :xf           0.0
                  :yf           0.0
-                 :w0           4.0
-                 :wf           4.0
-                 :h0           4.0
-                 :hf           4.0
+                 :w0           3.5
+                 :wf           3.5
+                 :h0           3.5
+                 :hf           3.5
                  :type         :julia
                  :julia-coeff0 (c/complex {:a 0.0 :b 0.7 :impl :plain})
                  :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
@@ -337,10 +388,10 @@
                  :y0           0.0
                  :xf           0.0
                  :yf           0.0
-                 :w0           4.0
-                 :wf           4.0
-                 :h0           4.0
-                 :hf           4.0
+                 :w0           3.5
+                 :wf           3.5
+                 :h0           3.5
+                 :hf           3.5
                  :type         :julia
                  :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
                  :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
@@ -349,17 +400,16 @@
                  :y0           0.0
                  :xf           0.0
                  :yf           0.0
-                 :w0           4.0
-                 :wf           4.0
-                 :h0           4.0
-                 :hf           4.0
+                 :w0           3.5
+                 :wf           3.5
+                 :h0           3.5
+                 :hf           3.5
                  :type         :julia
                  :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
                  :julia-coefff (c/complex {:a 0.0 :b -0.7 :impl :plain})}]}})
 
 (def render-config
-  {
-   :fast   {:test-size    10000
+  {:fast   {:test-size    10000
             :views        20
             :img-w        200
             :img-h        200
@@ -369,116 +419,78 @@
             :img-w        400
             :img-h        400
             :img-scale-fn #(imgz/scale % 3)}
-   :slow   {:test-size    2000000
-            :views        5
+   :slow   {:test-size    1000000
+            :views        20
             :img-w        1200
             :img-h        1200
             :img-scale-fn identity}
-   :render {:test-size    50000000
-            :views        10
-            :img-w        1200
-            :img-h        1200
+   :render {:test-size    10000000
+            :views        20
+            :img-w        1600
+            :img-h        1600
             :img-scale-fn identity}})
 
-(defn complex-between-pct [c1 c2 pct]
-  (c/complex
-    {:a    (+ (:a c1) (* pct (- (:a c2) (:a c1))))
-     :b    (+ (:b c1) (* pct (- (:b c2) (:b c1))))
-     :impl :plain}))
+(defn run []
+  (let [dir          (str "gen-img-test/test-" (System/currentTimeMillis))
+        fconfig      :c12
+        rconfig      :render
 
-(defn domains
-  [{:keys [views type wf hf w0 h0 x0 y0 xf yf julia-coeff0 julia-coefff iter-scale]
-    :or   {iter-scale 1.0}
-    :as   d}]
-  (->>
-    (range views -1 -1)
-    (map
-      (fn [i]
-        (let [width-range  (- w0 wf)
-              height-range (- h0 hf)
-              pct-desc     (/ i views)
-              pct-asc      (- 1.0 pct-desc)
-              dx           (* pct-asc (- xf x0))
-              dy           (* pct-asc (- yf y0))
-              dw           (+ (/ wf 2) (* pct-desc (/ width-range 2)))
-              dh           (+ (/ hf 2) (* pct-desc (/ height-range 2)))]
-          [[(+ (- x0 dw) dx)
-            (+ x0 dw dx)]
-           [(+ (- y0 dh) dy)
-            (+ y0 dh dy)]
-           (int (* iter-scale (width->iters (* 2 dw))))
-           (when (= :julia type)
-             (complex-between-pct julia-coeff0 julia-coefff pct-asc))])))))
+        {:keys [type multidom]
+         :as   fconfig-data} (fractal-config fconfig)
+        {:keys
+         [test-size views img-w
+          img-h img-scale-fn]} (render-config rconfig)
 
-(defn combine-domains [ds views]
-  (->>
-    ds
-    (map #(assoc % :views views))
-    (map domains)
-    (mapcat identity)))
-
-(defn animate-results [glob output]
-  (println "Creating animated gif from files, to file: " glob " -> " output)
-  (try
-    (sh "convert" "-delay" "25" "-loop" "0" glob output)
-    (catch Throwable t
-      (println "Could not create animated gif:" t))))
+        fconfig-data (assoc fconfig-data :views views)
+        domans       (if multidom
+                       (combine-domains multidom views)
+                       (domains fconfig-data))
+        f-spec       (case type
+                       :julia ::gt/interesting-intensity-plain-julia
+                       ;;
+                       ;;
+                       ;TODO mandel specs
+                       ;;
+                       ;;
+                       :mandel :TODO)
+        imgc*        (atom 1)]
+    (if-not (fs/exists? dir)
+      (fs/mkdir dir))
+    (doseq [[xrange yrange iters julia-coeff] domans]
+      (println "Domain, iters, size : " xrange yrange iters test-size)
+      (when julia-coeff
+        (reset! gt/JULIA-COEFF-PLAIN* julia-coeff))
+      (reset! gt/X-RANGE* xrange)
+      (reset! gt/Y-RANGE* yrange)
+      (reset! gt/MAX-CONV-ITERS* iters)
+      (let [image (BufferedImage.
+                    img-w
+                    img-h
+                    BufferedImage/TYPE_INT_ARGB)
+            its   (pgen-spec
+                    (s/gen
+                      f-spec)
+                    test-size)
+            imgf  (str dir (format "/img-%04d" @imgc*) ".png")]
+        (draw-intensities-w-raster its image img-w img-h)
+        ;(imgz/show image)
+        (imgz/save (img-scale-fn image) imgf)
+        (println "Wrote: " imgf)
+        (when (or (= :render rconfig)
+                  (= :slow rconfig))
+          #_(animate-results-gif (str dir "/*.png")
+                               (str dir "/fractal-part-" @imgc* ".gif"))
+          (animate-results-ffmpeg dir
+                                  (str dir "/fractal-part-" @imgc* ".mp4")))
+        (swap! imgc* inc)))
+    #_(animate-results-gif (str dir "/*.png")
+                         (str dir "/fractal-all.gif"))
+    (animate-results-ffmpeg dir
+                            (str dir "/fractal-all.mp4"))))
 
 (deftest gen-img-test
   (testing "Generates fractal image"
     (println "Generating frac")
-    (let [dir          (str "gen-img-test/test-" (System/currentTimeMillis))
-          fconfig      :c12
-          rconfig      :medium
-
-          {:keys [type multidom]
-           :as   fconfig-data} (fractal-config fconfig)
-          {:keys
-           [test-size views img-w
-            img-h img-scale-fn]} (render-config rconfig)
-
-          fconfig-data (assoc fconfig-data :views views)
-          domans       (if multidom
-                         (combine-domains multidom views)
-                         (domains fconfig-data))
-          f-spec       (case type
-                         :julia ::gt/interesting-intensity-plain-julia
-                         ;;
-                         ;;
-                         ;TODO mandel specs
-                         ;;
-                         ;;
-                         :mandel :TODO)]
-      (if-not (fs/exists? dir)
-        (fs/mkdir dir))
-      (doseq [[xrange yrange iters julia-coeff] domans]
-        (println "Domain, iters, size : " xrange yrange iters test-size)
-        (when julia-coeff
-          (reset! gt/JULIA-COEFF-PLAIN* julia-coeff))
-        (reset! gt/X-RANGE* xrange)
-        (reset! gt/Y-RANGE* yrange)
-        (reset! gt/MAX-CONV-ITERS* iters)
-        (let [image    (BufferedImage.
-                         img-w
-                         img-h
-                         BufferedImage/TYPE_INT_ARGB)
-              its      (pgen-spec
-                         (s/gen
-                           f-spec)
-                         test-size)
-              filetime (System/currentTimeMillis)
-              imgf     (str dir "/gen-img-test-"
-                            (name type) "-" (name fconfig) "-" (name rconfig) "-i" iters "-"
-                            filetime "-" test-size
-                            "-x-" (first xrange) "-" (second xrange)
-                            "-y-" (first yrange) "-" (second yrange) ".png")]
-          (draw-intensities-w-raster its image img-w img-h)
-          ;(imgz/show image)
-          (imgz/save (img-scale-fn image) imgf)
-          (println "Wrote: " imgf)
-          (animate-results (str dir "/*.png")
-                           (str dir "/fractal-part-" filetime ".gif"))))
-      (animate-results (str dir "/*.png")
-                       (str dir "/fractal-all.gif")))))
+    (run)))
 
 (run-tests 'hypercomplex.gen-img-test)

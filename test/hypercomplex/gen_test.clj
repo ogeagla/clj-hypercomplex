@@ -142,7 +142,7 @@
         (= n ##Inf)
         (= n ##NaN)))))
 
-(def SCALE 100000)
+(def SCALE 1000000)
 
 (defn i->x [i imax range]
   (let [dr (apply - (reverse range))
@@ -186,7 +186,7 @@
     (fn []
       (gen/fmap
         (fn [i]
-          (i->x (rand-int 10000) 10000 @XY-RANGE*))
+          (i->x (rand-int SCALE) (inc SCALE) @XY-RANGE*))
         (gen/int)))))
 
 (s/def ::2d-domain
