@@ -81,7 +81,8 @@
       (- (dec img-dim-size) c)
       c)))
 
-(defn img-intensities [intensities surface-width surface-height palette]
+(defn img-intensities
+  [intensities surface-width surface-height palette]
   (pmap
     (fn [[x y iters]]
       (let [i       (intensity-coord->img-coord
@@ -100,9 +101,12 @@
   (let [^WritableRaster raster (.getRaster image)
         ^Graphics g            (.getGraphics image)
         img-vals               (img-intensities
-                                 intensities surface-width surface-height palette)
-        x-zero                 (intensity-coord->img-coord 0 surface-width @gt/X-RANGE* false)
-        y-zero                 (intensity-coord->img-coord 0 surface-height @gt/Y-RANGE* true)]
+                                 intensities surface-width
+                                 surface-height palette)
+        x-zero                 (intensity-coord->img-coord
+                                 0 surface-width @gt/X-RANGE* false)
+        y-zero                 (intensity-coord->img-coord
+                                 0 surface-height @gt/Y-RANGE* true)]
     (doseq [[^int i ^int j ^ints argb] img-vals]
       (.setPixel raster i j argb))
     (.setColor g Color/BLACK)
@@ -199,7 +203,6 @@
          :or   {iter-scale 1.0}} (last doms)
         {:keys [pan zoom iter-var frac-var]
          :or   {iter-var iter-scale}} ops
-
         my-type         type
         my-julia-coeff0 julia-coefff
         my-julia-coefff (or frac-var julia-coefff)
@@ -210,8 +213,7 @@
         my-xf           (if pan (first pan) xf)
         my-yf           (if pan (second pan) yf)
         my-wf           (if zoom (first zoom) wf)
-        my-hf           (if zoom (second zoom) hf)
-        ]
+        my-hf           (if zoom (second zoom) hf)]
     (conj doms
           {:iter-scale   iter-var
            :x0           my-x0
@@ -263,8 +265,7 @@
          :julia-coeff0 (c/complex {:a -0.2 :b 0.9 :impl :plain})
          :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
    ;Varies Julia fractal params only.
-   :c5  {
-         :x0           0.0
+   :c5  {:x0           0.0
          :y0           0.0
          :xf           0.0
          :yf           -0.0
@@ -277,8 +278,7 @@
          :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
 
    ;Varies Julia fractal params in `a` only
-   :c6  {
-         :x0           0.0
+   :c6  {:x0           0.0
          :y0           0.0
          :xf           0.0
          :yf           -0.0
@@ -292,8 +292,7 @@
 
 
    ;Varies Julia fractal params in `b` only
-   :c7  {
-         :x0           0.0
+   :c7  {:x0           0.0
          :y0           0.0
          :xf           0.0
          :yf           -0.0
@@ -446,21 +445,21 @@
                        :hf           3.5
                        :type         :julia
                        :julia-coeff0 (c/complex
-                                       {:a 0.0 :b -0.75 :impl :plain})
+                                       {:a 0.0 :b -0.8 :impl :plain})
                        :julia-coefff (c/complex
-                                       {:a -0.04 :b -0.75 :impl :plain})}]
+                                       {:a -0.06 :b -0.8 :impl :plain})}]
                      (multidom-with
                        :frac-var
-                       (c/complex {:a -0.04 :b -0.65 :impl :plain}))
+                       (c/complex {:a -0.06 :b -0.6 :impl :plain}))
                      (multidom-with
                        :frac-var
-                       (c/complex {:a 0.0 :b -0.75 :impl :plain}))
+                       (c/complex {:a 0.0 :b -0.8 :impl :plain}))
                      (multidom-with
                        :frac-var
-                       (c/complex {:a -0.04 :b -0.75 :impl :plain}))
+                       (c/complex {:a -0.06 :b -0.8 :impl :plain}))
                      (multidom-with
                        :frac-var
-                       (c/complex {:a 0.0 :b -0.65 :impl :plain})))}})
+                       (c/complex {:a 0.0 :b -0.6 :impl :plain})))}})
 
 
 (def render-config
@@ -483,13 +482,18 @@
             :views        3
             :img-w        1600
             :img-h        1600
+            :img-scale-fn identity}
+   :insane {:test-size    100000000
+            :views        3
+            :img-w        2400
+            :img-h        2400
             :img-scale-fn identity}})
 
 
 (defn run []
   (let [dir          (str "gen-img-test/test-" (System/currentTimeMillis))
         fconfig      :c13
-        rconfig      :render
+        rconfig      :insane
 
         {:keys [type multidom palette]
          :or   {palette :green-red}
@@ -502,14 +506,15 @@
         domans       (if multidom
                        (combine-domains multidom views)
                        (domains fconfig-data))
-        f-spec       (case type
+        frac-spec    (case type
                        :julia ::gt/interesting-intensity-plain-julia
                        ;;
                        ;;
                        ;TODO mandel specs
                        ;;
                        ;;
-                       :mandel :TODO)
+                       ;:mandel :TODO
+                       )
         imgc*        (atom 1)]
     (if-not (fs/exists? dir)
       (fs/mkdir dir))
@@ -526,15 +531,17 @@
                     BufferedImage/TYPE_INT_ARGB)
             its   (pgen-spec
                     (s/gen
-                      f-spec)
+                      frac-spec)
                     test-size)
             imgf  (str dir (format "/img-%04d" @imgc*) ".png")]
         (draw-intensities-w-raster its image img-w img-h palette)
         ;(imgz/show image)
         (imgz/save (img-scale-fn image) imgf)
         (println "Wrote: " imgf)
-        (when (or (= :render rconfig)
-                  (= :slow rconfig))
+        (when (or
+                (= :insane rconfig)
+                (= :render rconfig)
+                (= :slow rconfig))
           #_(animate-results-gif (str dir "/*.png")
                                  (str dir "/fractal-part-" @imgc* ".gif"))
           (animate-results-ffmpeg dir
