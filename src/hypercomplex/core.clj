@@ -30,7 +30,7 @@
 
 (defn- nion-ops-scale [this s]
   (loop [new-this this
-         idx (dec (:order this))]
+         idx      (dec (:order this))]
     (let [new-new-this (set-idx
                          new-this
                          idx
@@ -63,7 +63,6 @@
            this)
     (inv other)))
 
-
 (defn eq-order? [a b]
   (and
     (:order a)
@@ -71,37 +70,48 @@
     (= (:order a)
        (:order b))))
 
-
 (defrecord Complex2Apache [a b]
   Nion
   (init [this]
-    (assoc this :order 2
-                :obj (Complex. a b)))
+    (assoc this
+      :order 2
+      :obj (Complex. a b)))
   (c [this]
     (let [cpx-cnj (.conjugate ^Complex (:obj this))]
-      (assoc this :obj cpx-cnj
-                  :a (.getReal cpx-cnj)
-                  :b (.getImaginary cpx-cnj))))
+      (assoc this
+        :obj cpx-cnj
+        :a (.getReal cpx-cnj)
+        :b (.getImaginary cpx-cnj))))
   (neg [this]
     (let [cpx-neg (.negate ^Complex (:obj this))]
-      (assoc this :obj cpx-neg
-                  :a (.getReal ^Complex cpx-neg)
-                  :b (.getImaginary ^Complex cpx-neg))))
+      (assoc this
+        :obj cpx-neg
+        :a (.getReal ^Complex cpx-neg)
+        :b (.getImaginary ^Complex cpx-neg))))
   (times [this other]
-    (let [cpx-times (.multiply ^Complex (:obj this) ^Complex (:obj other))]
-      (assoc this :obj cpx-times
-                  :a (.getReal ^Complex cpx-times)
-                  :b (.getImaginary ^Complex cpx-times))))
+    (let [cpx-times (.multiply
+                      ^Complex (:obj this)
+                      ^Complex (:obj other))]
+      (assoc this
+        :obj cpx-times
+        :a (.getReal ^Complex cpx-times)
+        :b (.getImaginary ^Complex cpx-times))))
   (plus [this other]
-    (let [cpx-add (.add ^Complex (:obj this) ^Complex (:obj other))]
-      (assoc this :obj cpx-add
-                  :a (.getReal ^Complex cpx-add)
-                  :b (.getImaginary ^Complex cpx-add))))
+    (let [cpx-add (.add
+                    ^Complex (:obj this)
+                    ^Complex (:obj other))]
+      (assoc this
+        :obj cpx-add
+        :a (.getReal ^Complex cpx-add)
+        :b (.getImaginary ^Complex cpx-add))))
   (minus [this other]
-    (let [cpx-subtract (.subtract ^Complex (:obj this) ^Complex (:obj other))]
-      (assoc this :obj cpx-subtract
-                  :a (.getReal ^Complex cpx-subtract)
-                  :b (.getImaginary ^Complex cpx-subtract))))
+    (let [cpx-subtract (.subtract
+                         ^Complex (:obj this)
+                         ^Complex (:obj other))]
+      (assoc this
+        :obj cpx-subtract
+        :a (.getReal ^Complex cpx-subtract)
+        :b (.getImaginary ^Complex cpx-subtract))))
   (valid-idx? [this idx]
     "Throws exception when index is invalid.
     For a Complex2 type, index can only be 0 or 1 (a or b in a+bi)."
@@ -179,7 +189,9 @@
       (do
         (throw
           (ex-info
-            (str "Complex2 Index must be int 0 or 1: " idx)
+            (str
+              "Complex2 Index must be int 0 or 1: "
+              idx)
             {:type :invalid-index-access}))
         false)
       true))
@@ -216,7 +228,9 @@
     (if-not (eq-order? a b)
       (throw
         (ex-info
-          (str "Orders of a and b must match to init hypercomplex: " a b)
+          (str
+            "Orders of a and b must match to init hypercomplex: "
+            a b)
           {:type :orders-mismatch}))
 
       (assoc this
@@ -228,7 +242,9 @@
     (if-not (eq-order? this other)
       (throw
         (ex-info
-          (str "Orders of this and other must match to multiply hypercomplex: " this other)
+          (str
+            "Orders of this and other must match to multiply hypercomplex: "
+            this other)
           {:type :orders-mismatch}))
       (assoc this :a (minus
                        (times (:a this) (:a other))
@@ -243,7 +259,9 @@
     (if-not (eq-order? this other)
       (throw
         (ex-info
-          (str "Orders of this and other must match to add hypercomplex: " this other)
+          (str
+            "Orders of this and other must match to add hypercomplex: "
+            this other)
           {:type :orders-mismatch}))
       (assoc this :a (plus (:a this)
                            (:a other))
@@ -261,7 +279,9 @@
       (do
         (throw
           (ex-info
-            (str "Construction index must be less than order: " idx (:order this))
+            (str
+              "Construction index must be less than order: "
+              idx (:order this))
             {:type :invalid-index-access}))
         false)
       true))
@@ -269,17 +289,17 @@
     (when (valid-idx? this idx)
       (let [half-order (/ (:order this)
                           2)
-            new-idx (mod idx half-order)
-            retval (if (< idx half-order)
-                     (get-idx (:a this) new-idx)
-                     (get-idx (:b this) new-idx))]
+            new-idx    (mod idx half-order)
+            retval     (if (< idx half-order)
+                         (get-idx (:a this) new-idx)
+                         (get-idx (:b this) new-idx))]
         retval)))
 
   (set-idx [this idx new-val]
     (when (valid-idx? this idx)
       (let [half-order (/ (:order this)
                           2)
-            new-idx (mod idx half-order)]
+            new-idx    (mod idx half-order)]
         (if (< idx half-order)
           (update-in this [:a] set-idx new-idx new-val)
           (update-in this [:b] set-idx new-idx new-val)))))
@@ -306,5 +326,3 @@
 (defn init-construction [a b]
   (init
     (->Construction a b)))
-
-

@@ -4,9 +4,16 @@
              [complex quaternion octonion sedenion
               pathion n-hypercomplex power-of?]]))
 
-(def JULIA-COEFF-PLAIN* (atom (complex {:a -0.1 :b 0.7 :impl :plain})))
+(set! *unchecked-math* true)
+(set! *warn-on-reflection* true)
 
-(defn compute-iters-mandel [p q impl max-iterations]
+(defn compute-iters-mandel
+  "Computer iterations required for equation:
+  z_n+1 = z_n^2 + c, where z_0 = c, and
+  c = p + q*i.
+  Iterations are complete when |z| > 2.
+  Impl is :apache or :plain."
+  [p q impl max-iterations]
   (let [c (complex {:a p :b q :impl impl})]
     (loop [z          c
            iterations 0]
@@ -22,9 +29,15 @@
             (times z z))
           (inc iterations))))))
 
-(defn compute-iters-julia [p q impl max-iterations]
+(defn compute-iters-julia
+  "Computer iterations of equation:
+  z_n+1 = z_n^2 + d, where z_0 = p + q*i,
+  and d is the provided julia coefficient.
+  Iterations are complete when |z| > 2.
+  Impl is :apache or :plain."
+  [p q impl max-iterations julia-coeff]
   (let [c           (complex {:a p :b q :impl impl})
-        julia-coeff @JULIA-COEFF-PLAIN*]
+        julia-coeff julia-coeff]
     (loop [z          c
            iterations 0]
       ;(println "hc Mandelbrot z: " z)
