@@ -186,6 +186,46 @@
     (map domains)
     (mapcat identity)))
 
+(defn multidom-with
+  "Ops:
+   :pan [new-x-coord new-y]
+   :zoom [new-w new-h]
+   :iter-var new-scale
+   :frac-var new-frac-var
+  "
+  [doms & ops]
+  (let [{:keys [xf yf wf hf type
+                julia-coefff iter-scale]
+         :or   {iter-scale 1.0}} (last doms)
+        {:keys [pan zoom iter-var frac-var]
+         :or   {iter-var iter-scale}} ops
+
+        my-type         type
+        my-julia-coeff0 julia-coefff
+        my-julia-coefff (or frac-var julia-coefff)
+        my-x0           xf
+        my-y0           yf
+        my-h0           hf
+        my-w0           wf
+        my-xf           (if pan (first pan) xf)
+        my-yf           (if pan (second pan) yf)
+        my-wf           (if zoom (first zoom) wf)
+        my-hf           (if zoom (second zoom) hf)
+        ]
+    (conj doms
+          {:iter-scale   iter-var
+           :x0           my-x0
+           :y0           my-y0
+           :xf           my-xf
+           :yf           my-yf
+           :w0           my-w0
+           :wf           my-wf
+           :h0           my-h0
+           :hf           my-hf
+           :type         my-type
+           :julia-coeff0 my-julia-coeff0
+           :julia-coefff my-julia-coefff})))
+
 (def fractal-config
   {
    ;Moves, zooms, on Mandelbrot
@@ -360,108 +400,96 @@
                  :type         :julia
                  :julia-coeff0 (c/complex {:a 0.1 :b -0.7 :impl :plain})
                  :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}]}
-   :c12 {:type    :julia
-         :palette :rainbow
-         :multidom
-                  [{:iter-scale   2.0
-                    :x0           0.0
-                    :y0           0.0
-                    :xf           0.0
-                    :yf           0.0
-                    :w0           3.5
-                    :wf           3.5
-                    :h0           3.5
-                    :hf           3.5
-                    :type         :julia
-                    :julia-coeff0 (c/complex {:a 0.0 :b -0.7 :impl :plain})
-                    :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
-                   {:iter-scale   2.0
-                    :x0           0.0
-                    :y0           0.0
-                    :xf           0.0
-                    :yf           0.0
-                    :w0           3.5
-                    :wf           3.5
-                    :h0           3.5
-                    :hf           3.5
-                    :type         :julia
-                    :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
-                    :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
-                   {:iter-scale   2.0
-                    :x0           0.0
-                    :y0           0.0
-                    :xf           0.0
-                    :yf           0.0
-                    :w0           3.5
-                    :wf           3.5
-                    :h0           3.5
-                    :hf           3.5
-                    :type         :julia
-                    :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
-                    :julia-coefff (c/complex {:a 0.0 :b 0.7 :impl :plain})}
-                   {:iter-scale   2.0
-                    :x0           0.0
-                    :y0           0.0
-                    :xf           0.0
-                    :yf           0.0
-                    :w0           3.5
-                    :wf           3.5
-                    :h0           3.5
-                    :hf           3.5
-                    :type         :julia
-                    :julia-coeff0 (c/complex {:a 0.0 :b 0.7 :impl :plain})
-                    :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
-                   {:iter-scale   2.0
-                    :x0           0.0
-                    :y0           0.0
-                    :xf           0.0
-                    :yf           0.0
-                    :w0           3.5
-                    :wf           3.5
-                    :h0           3.5
-                    :hf           3.5
-                    :type         :julia
-                    :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
-                    :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
-                   {:iter-scale   2.0
-                    :x0           0.0
-                    :y0           0.0
-                    :xf           0.0
-                    :yf           0.0
-                    :w0           3.5
-                    :wf           3.5
-                    :h0           3.5
-                    :hf           3.5
-                    :type         :julia
-                    :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
-                    :julia-coefff (c/complex {:a 0.0 :b -0.7 :impl :plain})}]}})
+   :c12 {:type     :julia
+         :palette  :rainbow
+         :multidom (->
+                     [{:iter-scale   2.0
+                       :x0           0.0
+                       :y0           0.0
+                       :xf           0.0
+                       :yf           0.0
+                       :w0           3.5
+                       :wf           3.5
+                       :h0           3.5
+                       :hf           3.5
+                       :type         :julia
+                       :julia-coeff0 (c/complex
+                                       {:a 0.0 :b -0.7 :impl :plain})
+                       :julia-coefff (c/complex
+                                       {:a -0.1 :b -0.7 :impl :plain})}]
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a -0.1 :b 0.7 :impl :plain}))
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a 0.0 :b 0.7 :impl :plain}))
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a -0.1 :b 0.7 :impl :plain}))
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a -0.1 :b -0.7 :impl :plain}))
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a 0.0 :b -0.7 :impl :plain})))}
+   :c13 {:type     :julia
+         :palette  :rainbow
+         :multidom (->
+                     [{:iter-scale   10.0
+                       :x0           0.0
+                       :y0           0.0
+                       :xf           0.0
+                       :yf           0.0
+                       :w0           3.5
+                       :wf           3.5
+                       :h0           3.5
+                       :hf           3.5
+                       :type         :julia
+                       :julia-coeff0 (c/complex
+                                       {:a 0.0 :b -0.75 :impl :plain})
+                       :julia-coefff (c/complex
+                                       {:a -0.04 :b -0.75 :impl :plain})}]
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a -0.04 :b -0.65 :impl :plain}))
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a 0.0 :b -0.75 :impl :plain}))
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a -0.04 :b -0.75 :impl :plain}))
+                     (multidom-with
+                       :frac-var
+                       (c/complex {:a 0.0 :b -0.65 :impl :plain})))}})
+
 
 (def render-config
-  {:fast   {:test-size    10000
-            :views        20
+  {:fast   {:test-size    20000
+            :views        10
             :img-w        200
             :img-h        200
             :img-scale-fn #(imgz/scale % 6)}
    :medium {:test-size    500000
-            :views        20
+            :views        5
             :img-w        400
             :img-h        400
             :img-scale-fn #(imgz/scale % 3)}
    :slow   {:test-size    5000000
-            :views        20
+            :views        5
             :img-w        1200
             :img-h        1200
             :img-scale-fn identity}
-   :render {:test-size    10000000
-            :views        20
+   :render {:test-size    20000000
+            :views        3
             :img-w        1600
             :img-h        1600
             :img-scale-fn identity}})
 
+
 (defn run []
   (let [dir          (str "gen-img-test/test-" (System/currentTimeMillis))
-        fconfig      :c12
-        rconfig      :slow
+        fconfig      :c13
+        rconfig      :render
 
         {:keys [type multidom palette]
          :or   {palette :green-red}
