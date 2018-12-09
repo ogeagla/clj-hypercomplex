@@ -1,7 +1,7 @@
-(ns hypercomplex.fractal-spec
+(ns hypercomplex.alpha.fractal-spec
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [hypercomplex.fractal-iters :as f]
+            [hypercomplex.alpha.fractal-iters :as f]
             [hypercomplex.core :refer :all]
             [hypercomplex.cayley-dickson-construction :refer
              [complex quaternion octonion sedenion

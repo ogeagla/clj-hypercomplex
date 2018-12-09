@@ -1,4 +1,4 @@
-(ns hypercomplex.fractal-colors)
+(ns hypercomplex.alpha.fractal-colors)
 
 (def MAX-COLOR-YELLOW (int-array [220 230 22 255]))
 

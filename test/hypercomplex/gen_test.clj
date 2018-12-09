@@ -5,8 +5,8 @@
     [clojure.test.check.clojure-test :as ct]
     [clojure.test.check.properties :as prop]
     [hypercomplex.core :refer :all]
-    [hypercomplex.core-spec :as cs]
-    [hypercomplex.fractal-spec :as fs]
+    [hypercomplex.alpha.core-spec :as cs]
+    [hypercomplex.alpha.fractal-spec :as fs]
     [hypercomplex.cayley-dickson-construction :refer
      [complex quaternion octonion sedenion
       pathion n-hypercomplex power-of?]]))

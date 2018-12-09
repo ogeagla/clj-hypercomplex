@@ -1,4 +1,4 @@
-(ns hypercomplex.fractal-generate
+(ns hypercomplex.alpha.fractal-generate
   (:require [me.raynes.fs :as fs]
             [clojure.spec.alpha :as s]
             [clojure.java.shell :refer [sh]]
@@ -6,11 +6,11 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [hypercomplex.cayley-dickson-construction :as c]
-            [hypercomplex.fractal-spec :as fspec]
-            [hypercomplex.fractal-colors :as fc]
+            [hypercomplex.alpha.fractal-spec :as fspec]
+            [hypercomplex.alpha.fractal-colors :as fc]
             [hypercomplex.core :refer :all]
             [me.raynes.fs :as fs]
-            [hypercomplex.fractal-iters :as f])
+            [hypercomplex.alpha.fractal-iters :as f])
   (:import (java.awt.image BufferedImage WritableRaster)
            (java.awt Color Graphics)
            (java.util Date)))
@@ -406,7 +406,8 @@
     (filter #(not (zero? (nth % 2))))))
 
 (defn run []
-  (let [fconfig      :c13
+  (let [gen-config   :rand-sample
+        fconfig      :c13
         rconfig      :insane
         dir          (str
                        "gen-img-test/test-" (name fconfig) "-"
@@ -423,11 +424,7 @@
                        (domains fconfig-data))
         frac-spec    (case type
                        :julia ::fspec/interesting-intensity-plain-julia
-                       ;;
-                       ;;
                        ;TODO mandel specs
-                       ;;
-                       ;;
                        ;:mandel :TODO
                        )
         imgc*        (atom 1)]
@@ -444,11 +441,14 @@
                           img-w
                           img-h
                           BufferedImage/TYPE_INT_ARGB)
-            intensities (intensities-random-sample
-                          xrange yrange iters julia-coeff 1000000 test-size)
-            ;intensities (intensities-gen-spec
-            ;              (s/gen frac-spec)
-            ;              test-size)
+            intensities (case gen-config
+                          :spec-sample (intensities-gen-spec
+                                         (s/gen frac-spec)
+                                         test-size)
+                          :rand-sample (intensities-random-sample
+                                         xrange yrange iters
+                                         julia-coeff 1000000 test-size))
+
             imgf        (str dir (format "/img-%04d" @imgc*) ".png")]
         (draw-intensities-w-raster intensities image img-w img-h palette)
         (imgz/save (img-scale-fn image) imgf)
@@ -459,7 +459,6 @@
           (animate-results-ffmpeg dir (str dir "/fractal-part-" @imgc* ".mp4")))
         (swap! imgc* inc)))
     (animate-results-ffmpeg dir (str dir "/fractal-all.mp4"))))
-(try
-  (run)
-  (catch Exception e
-    (clojure.pprint/pprint e)))
+
+(comment
+  (run))

@@ -1,8 +1,8 @@
-(ns hypercomplex.core-spec
+(ns hypercomplex.alpha.core-spec
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [hypercomplex.core :refer :all]
-            [hypercomplex.fractal-spec :as fs]
+            [hypercomplex.alpha.fractal-spec :as fs]
             [hypercomplex.cayley-dickson-construction :refer
              [complex quaternion octonion sedenion
               pathion n-hypercomplex power-of?]])

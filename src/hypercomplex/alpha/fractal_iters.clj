@@ -1,4 +1,4 @@
-(ns hypercomplex.fractal-iters
+(ns hypercomplex.alpha.fractal-iters
   (:require [hypercomplex.core :refer :all]
             [hypercomplex.cayley-dickson-construction :refer
              [complex quaternion octonion sedenion

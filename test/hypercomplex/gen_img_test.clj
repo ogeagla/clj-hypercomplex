@@ -1,6 +1,6 @@
 (ns hypercomplex.gen-img-test
   (:require [clojure.test :refer :all]
-            [hypercomplex.fractal-generate :as fg]))
+            [hypercomplex.alpha.fractal-generate :as fg]))
 
 (set! *unchecked-math* true)
 (set! *warn-on-reflection* true)
