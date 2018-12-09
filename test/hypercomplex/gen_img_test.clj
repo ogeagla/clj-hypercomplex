@@ -4,6 +4,7 @@
             [mikera.image.core :as imgz]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
+            [hypercomplex.fractal-iters :as f]
             [hypercomplex.gen-test :as gt]
             [hypercomplex.cayley-dickson-construction :as c]
             [me.raynes.fs :as fs])
@@ -14,16 +15,56 @@
 (set! *unchecked-math* true)
 (set! *warn-on-reflection* true)
 
-(defn- calc-pixel-color-argb
-  [iterations max-iterations]
+
+(defn animate-results-gif [glob output]
+  (println "Creating animated gif from files, to file: " glob " -> " output)
+  (try
+    (sh "convert" " -dispose" "2" "-delay" "7" "-loop" "0" glob output)
+    (catch Throwable t
+      (println "Could not create animated gif:" t))))
+
+(defn animate-results-ffmpeg [imgdir output]
+  (println "Creating animated mp4 from files, to file: " imgdir " -> " output)
+  (try
+    (sh "ffmpeg" "-framerate" "6" "-i"
+        (str imgdir "/img-%04d.png") "-c:v" "libx264" "-r" "30"
+        output)))
+
+(def MAX-COLOR-YELLOW (int-array [220 230 22 255]))
+
+(defn palette-rainbox [iters max-iters]
+  (let [total-intensity (/ iters max-iters)
+        [r g b imax] (cond
+                       (<= 0.0 total-intensity 0.2) [3 146 207 0.2]
+                       (<= 0.2 total-intensity 0.4) [123 192 67 0.4]
+                       (<= 0.4 total-intensity 0.6) [253 244 152 0.6]
+                       (<= 0.6 total-intensity 0.8) [243 119 54 0.8]
+                       (<= 0.8 total-intensity 1.0) [238 64 53 1.0])
+        [r g b] (->>
+                  [r g b]
+                  (map
+                    #(* % (/ total-intensity imax)))
+                  (map int))]
+    (int-array [r g b 255])))
+
+(defn palette-green-to-red [iters max-iters]
   (if (or #_(< iterations 10)
-        (= iterations max-iterations))
-    (int-array [220 230 22 255])
-    (let [gray (int (/ (* iterations 255) max-iterations))
-          r    (min (int (+ 20 gray)) 255)
-          g    (min (int (- 255 gray)) 255)
-          b    (min (int (Math/abs (- gray 80))) 255)]
+        (= iters max-iters))
+    MAX-COLOR-YELLOW
+    (let [total-intensity (int (/ (* iters 255) max-iters))
+          r               (min
+                            (int (+ 20 total-intensity)) 255)
+          g               (min
+                            (int (- 255 total-intensity)) 255)
+          b               (min
+                            (int (Math/abs (- total-intensity 80))) 255)]
       (int-array [r g b 255]))))
+
+(defn- calc-pixel-color-argb
+  [iterations max-iterations palette]
+  (case palette
+    :green-red (palette-green-to-red iterations max-iterations)
+    :rainbow (palette-rainbox iterations max-iterations)))
 
 (defn intensity-coord->img-coord
   [intensity-coord img-dim-size intensity-domain flip?]
@@ -40,7 +81,7 @@
       (- (dec img-dim-size) c)
       c)))
 
-(defn img-intensities [intensities surface-width surface-height]
+(defn img-intensities [intensities surface-width surface-height palette]
   (pmap
     (fn [[x y iters]]
       (let [i       (intensity-coord->img-coord
@@ -48,18 +89,18 @@
             j       (intensity-coord->img-coord
                       y surface-height @gt/Y-RANGE* true)
             ^ints c (calc-pixel-color-argb
-                      iters @gt/MAX-CONV-ITERS*)]
+                      iters @gt/MAX-CONV-ITERS* palette)]
         [i j c]))
     intensities))
 
 (defn- draw-intensities-w-raster
-  [intensities ^BufferedImage image surface-width surface-height]
+  [intensities ^BufferedImage image surface-width surface-height palette]
   ; Maybe look at this if performance is not improving with this technique:
   ; https://stackoverflow.com/questions/25178810/create-a-writableraster-based-on-int-array
   (let [^WritableRaster raster (.getRaster image)
         ^Graphics g            (.getGraphics image)
         img-vals               (img-intensities
-                                 intensities surface-width surface-height)
+                                 intensities surface-width surface-height palette)
         x-zero                 (intensity-coord->img-coord 0 surface-width @gt/X-RANGE* false)
         y-zero                 (intensity-coord->img-coord 0 surface-height @gt/Y-RANGE* true)]
     (doseq [[^int i ^int j ^ints argb] img-vals]
@@ -144,20 +185,6 @@
     (map #(assoc % :views views))
     (map domains)
     (mapcat identity)))
-
-(defn animate-results-gif [glob output]
-  (println "Creating animated gif from files, to file: " glob " -> " output)
-  (try
-    (sh "convert" " -dispose" "2" "-delay" "7" "-loop" "0" glob output)
-    (catch Throwable t
-      (println "Could not create animated gif:" t))))
-
-(defn animate-results-ffmpeg [imgdir output]
-  (println "Creating animated mp4 from files, to file: " imgdir " -> " output)
-  (try
-    (sh "ffmpeg" "-framerate" "6" "-i"
-        (str imgdir "/img-%04d.png") "-c:v" "libx264" "-r" "30"
-        output)))
 
 (def fractal-config
   {
@@ -333,80 +360,81 @@
                  :type         :julia
                  :julia-coeff0 (c/complex {:a 0.1 :b -0.7 :impl :plain})
                  :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}]}
-   :c12 {:type :julia
+   :c12 {:type    :julia
+         :palette :rainbow
          :multidom
-               [{:iter-scale   1.0
-                 :x0           0.0
-                 :y0           0.0
-                 :xf           0.0
-                 :yf           0.0
-                 :w0           3.5
-                 :wf           3.5
-                 :h0           3.5
-                 :hf           3.5
-                 :type         :julia
-                 :julia-coeff0 (c/complex {:a 0.0 :b -0.7 :impl :plain})
-                 :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
-                {:iter-scale   1.0
-                 :x0           0.0
-                 :y0           0.0
-                 :xf           0.0
-                 :yf           0.0
-                 :w0           3.5
-                 :wf           3.5
-                 :h0           3.5
-                 :hf           3.5
-                 :type         :julia
-                 :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
-                 :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
-                {:iter-scale   1.0
-                 :x0           0.0
-                 :y0           0.0
-                 :xf           0.0
-                 :yf           0.0
-                 :w0           3.5
-                 :wf           3.5
-                 :h0           3.5
-                 :hf           3.5
-                 :type         :julia
-                 :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
-                 :julia-coefff (c/complex {:a 0.0 :b 0.7 :impl :plain})}
-                {:iter-scale   1.0
-                 :x0           0.0
-                 :y0           0.0
-                 :xf           0.0
-                 :yf           0.0
-                 :w0           3.5
-                 :wf           3.5
-                 :h0           3.5
-                 :hf           3.5
-                 :type         :julia
-                 :julia-coeff0 (c/complex {:a 0.0 :b 0.7 :impl :plain})
-                 :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
-                {:iter-scale   1.0
-                 :x0           0.0
-                 :y0           0.0
-                 :xf           0.0
-                 :yf           0.0
-                 :w0           3.5
-                 :wf           3.5
-                 :h0           3.5
-                 :hf           3.5
-                 :type         :julia
-                 :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
-                 :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
-                {:iter-scale   1.0
-                 :x0           0.0
-                 :y0           0.0
-                 :xf           0.0
-                 :yf           0.0
-                 :w0           3.5
-                 :wf           3.5
-                 :h0           3.5
-                 :hf           3.5
-                 :type         :julia
-                 :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
-                 :julia-coefff (c/complex {:a 0.0 :b -0.7 :impl :plain})}]}})
+                  [{:iter-scale   2.0
+                    :x0           0.0
+                    :y0           0.0
+                    :xf           0.0
+                    :yf           0.0
+                    :w0           3.5
+                    :wf           3.5
+                    :h0           3.5
+                    :hf           3.5
+                    :type         :julia
+                    :julia-coeff0 (c/complex {:a 0.0 :b -0.7 :impl :plain})
+                    :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
+                   {:iter-scale   2.0
+                    :x0           0.0
+                    :y0           0.0
+                    :xf           0.0
+                    :yf           0.0
+                    :w0           3.5
+                    :wf           3.5
+                    :h0           3.5
+                    :hf           3.5
+                    :type         :julia
+                    :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
+                    :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
+                   {:iter-scale   2.0
+                    :x0           0.0
+                    :y0           0.0
+                    :xf           0.0
+                    :yf           0.0
+                    :w0           3.5
+                    :wf           3.5
+                    :h0           3.5
+                    :hf           3.5
+                    :type         :julia
+                    :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
+                    :julia-coefff (c/complex {:a 0.0 :b 0.7 :impl :plain})}
+                   {:iter-scale   2.0
+                    :x0           0.0
+                    :y0           0.0
+                    :xf           0.0
+                    :yf           0.0
+                    :w0           3.5
+                    :wf           3.5
+                    :h0           3.5
+                    :hf           3.5
+                    :type         :julia
+                    :julia-coeff0 (c/complex {:a 0.0 :b 0.7 :impl :plain})
+                    :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
+                   {:iter-scale   2.0
+                    :x0           0.0
+                    :y0           0.0
+                    :xf           0.0
+                    :yf           0.0
+                    :w0           3.5
+                    :wf           3.5
+                    :h0           3.5
+                    :hf           3.5
+                    :type         :julia
+                    :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
+                    :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
+                   {:iter-scale   2.0
+                    :x0           0.0
+                    :y0           0.0
+                    :xf           0.0
+                    :yf           0.0
+                    :w0           3.5
+                    :wf           3.5
+                    :h0           3.5
+                    :hf           3.5
+                    :type         :julia
+                    :julia-coeff0 (c/complex {:a -0.1 :b -0.7 :impl :plain})
+                    :julia-coefff (c/complex {:a 0.0 :b -0.7 :impl :plain})}]}})
 
 (def render-config
   {:fast   {:test-size    10000
@@ -419,7 +447,7 @@
             :img-w        400
             :img-h        400
             :img-scale-fn #(imgz/scale % 3)}
-   :slow   {:test-size    1000000
+   :slow   {:test-size    5000000
             :views        20
             :img-w        1200
             :img-h        1200
@@ -433,9 +461,10 @@
 (defn run []
   (let [dir          (str "gen-img-test/test-" (System/currentTimeMillis))
         fconfig      :c12
-        rconfig      :render
+        rconfig      :slow
 
-        {:keys [type multidom]
+        {:keys [type multidom palette]
+         :or   {palette :green-red}
          :as   fconfig-data} (fractal-config fconfig)
         {:keys
          [test-size views img-w
@@ -459,7 +488,7 @@
     (doseq [[xrange yrange iters julia-coeff] domans]
       (println "Domain, iters, size : " xrange yrange iters test-size)
       (when julia-coeff
-        (reset! gt/JULIA-COEFF-PLAIN* julia-coeff))
+        (reset! f/JULIA-COEFF-PLAIN* julia-coeff))
       (reset! gt/X-RANGE* xrange)
       (reset! gt/Y-RANGE* yrange)
       (reset! gt/MAX-CONV-ITERS* iters)
@@ -472,19 +501,19 @@
                       f-spec)
                     test-size)
             imgf  (str dir (format "/img-%04d" @imgc*) ".png")]
-        (draw-intensities-w-raster its image img-w img-h)
+        (draw-intensities-w-raster its image img-w img-h palette)
         ;(imgz/show image)
         (imgz/save (img-scale-fn image) imgf)
         (println "Wrote: " imgf)
         (when (or (= :render rconfig)
                   (= :slow rconfig))
           #_(animate-results-gif (str dir "/*.png")
-                               (str dir "/fractal-part-" @imgc* ".gif"))
+                                 (str dir "/fractal-part-" @imgc* ".gif"))
           (animate-results-ffmpeg dir
                                   (str dir "/fractal-part-" @imgc* ".mp4")))
         (swap! imgc* inc)))
     #_(animate-results-gif (str dir "/*.png")
-                         (str dir "/fractal-all.gif"))
+                           (str dir "/fractal-all.gif"))
     (animate-results-ffmpeg dir
                             (str dir "/fractal-all.mp4"))))
 

@@ -8,6 +8,7 @@
     [clojure.spec.gen.alpha :as gen]
     [clojure.test.check.generators :as g]
     [hypercomplex.core :refer :all]
+    [hypercomplex.fractal-iters :as f]
     [hypercomplex.cayley-dickson-construction :refer
      [complex quaternion octonion sedenion
       pathion n-hypercomplex power-of?]]
@@ -198,41 +199,6 @@
         (s/gen ::xcoeff)
         (s/gen ::ycoeff)))))
 
-(defn compute-iters-mandel [p q impl max-iterations]
-  (let [c (complex {:a p :b q :impl impl})]
-    (loop [z          c
-           iterations 0]
-      ;(println "hc Mandelbrot z: " z)
-      (if (or (> (mag z) 2.0)
-              (> iterations max-iterations))
-        (if (= 0 iterations)
-          0
-          (dec iterations))
-        (recur
-          (plus
-            c
-            (times z z))
-          (inc iterations))))))
-
-(def JULIA-COEFF-PLAIN* (atom (complex {:a -0.1 :b 0.7 :impl :plain})))
-
-(defn compute-iters-julia [p q impl max-iterations]
-  (let [c           (complex {:a p :b q :impl impl})
-        julia-coeff @JULIA-COEFF-PLAIN*]
-    (loop [z          c
-           iterations 0]
-      ;(println "hc Mandelbrot z: " z)
-      (if (or (> (mag z) 2.0)
-              (> iterations max-iterations))
-        (if (= 0 iterations)
-          0
-          (dec iterations))
-        (recur
-          (plus
-            julia-coeff
-            (times z z))
-          (inc iterations))))))
-
 ;Julia
 (s/def ::intensity-plain-julia
   (s/with-gen
@@ -245,7 +211,7 @@
       (gen/fmap
         (fn [[a b]]
           [a b
-           (compute-iters-julia a b :plain @MAX-CONV-ITERS*)])
+           (f/compute-iters-julia a b :plain @MAX-CONV-ITERS*)])
         (s/gen ::2d-domain)))))
 
 ;interesting in the sense that it's not 0 and not max-iters,
@@ -285,7 +251,7 @@
       (gen/fmap
         (fn [[a b]]
           [a b
-           (compute-iters-mandel a b :plain @MAX-CONV-ITERS*)])
+           (f/compute-iters-mandel a b :plain @MAX-CONV-ITERS*)])
         (s/gen ::2d-domain)))))
 
 ;interesting in the sense that it's not 0 and not max-iters,
@@ -311,8 +277,6 @@
       (gen/vector-distinct
         (s/gen ::interesting-intensity-plain-mandel)
         {:num-elements 100}))))
-
-
 
 
 (ct/defspec
