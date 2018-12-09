@@ -417,36 +417,31 @@
                        :hf           3.5
                        :type         :julia
                        :julia-coeff0 (c/complex
-                                       {:a 0.0 :b -0.8 :impl :plain})
+                                       {:a -0.08 :b -0.65 :impl :plain})
                        :julia-coefff (c/complex
-                                       {:a -0.06 :b -0.8 :impl :plain})}]
+                                       {:a -0.01 :b -0.72 :impl :plain})}]
                      (multidom-with
                        :fractal-coeff-change
-                       (c/complex {:a -0.06 :b -0.6 :impl :plain}))
+                       (c/complex {:a -0.05 :b -0.66 :impl :plain}))
                      (multidom-with
                        :fractal-coeff-change
-                       (c/complex {:a 0.0 :b -0.8 :impl :plain}))
-                     (multidom-with
-                       :fractal-coeff-change
-                       (c/complex {:a -0.06 :b -0.8 :impl :plain}))
-                     (multidom-with
-                       :fractal-coeff-change
-                       (c/complex {:a 0.0 :b -0.6 :impl :plain})))}})
+                       (c/complex {:a -0.11 :b -0.71 :impl :plain}))
+                     )}})
 
 
 (def render-config
   {:fast   {:test-size    20000
             :views        10
-            :img-w        200
-            :img-h        200
-            :img-scale-fn #(imgz/scale % 6)}
+            :img-w        100
+            :img-h        100
+            :img-scale-fn #(imgz/scale % 12)}
    :medium {:test-size    500000
-            :views        5
+            :views        10
             :img-w        400
             :img-h        400
             :img-scale-fn #(imgz/scale % 3)}
    :slow   {:test-size    5000000
-            :views        5
+            :views        20
             :img-w        1200
             :img-h        1200
             :img-scale-fn identity}
@@ -464,7 +459,7 @@
 (defn run []
   (let [dir          (str "gen-img-test/test-" (System/currentTimeMillis))
         fconfig      :c13
-        rconfig      :fast
+        rconfig      :slow
         {:keys [type multidom palette]
          :or   {palette :green-red}
          :as   fconfig-data} (fractal-config fconfig)
