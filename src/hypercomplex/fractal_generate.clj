@@ -8,9 +8,12 @@
             [hypercomplex.cayley-dickson-construction :as c]
             [hypercomplex.fractal-spec :as fspec]
             [hypercomplex.fractal-colors :as fc]
-            [me.raynes.fs :as fs])
+            [hypercomplex.core :refer :all]
+            [me.raynes.fs :as fs]
+            [hypercomplex.fractal-iters :as f])
   (:import (java.awt.image BufferedImage WritableRaster)
-           (java.awt Color Graphics)))
+           (java.awt Color Graphics)
+           (java.util Date)))
 
 
 (set! *unchecked-math* true)
@@ -68,13 +71,12 @@
 
 (defn- draw-intensities-w-raster
   [intensities ^BufferedImage image surface-width surface-height palette]
-  ; Maybe look at this if performance is not improving with this technique:
-  ; https://stackoverflow.com/questions/25178810/create-a-writableraster-based-on-int-array
   (let [^WritableRaster raster (.getRaster image)
         ^Graphics g            (.getGraphics image)
-        img-vals               (img-intensities
-                                 intensities surface-width
-                                 surface-height palette)
+        img-vals               (set
+                                 (img-intensities
+                                   intensities surface-width
+                                   surface-height palette))
         x-zero                 (intensity-coord->img-coord
                                  0 surface-width @fspec/X-RANGE* false)
         y-zero                 (intensity-coord->img-coord
@@ -90,10 +92,10 @@
                x-zero surface-height)))
 
 
-(defn pgen-spec [generator quant]
+(defn intensities-gen-spec [generator quant]
   (pmap
     (fn [i]
-      (when (= 0 (mod i (int (/ quant 5))))
+      (when (= 0 (rem i (int (/ quant 10))))
         (println "Generating intensity " i " / " quant " , "
                  (int (* 100 (/ i quant))) "% complete, t="
                  (System/currentTimeMillis)))
@@ -236,59 +238,6 @@
          :type         :julia
          :julia-coeff0 (c/complex {:a -0.2 :b 0.9 :impl :plain})
          :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
-   ;Varies Julia fractal params only.
-   :c5  {:x0           0.0
-         :y0           0.0
-         :xf           0.0
-         :yf           -0.0
-         :w0           2.0
-         :wf           2.0
-         :h0           2.0
-         :hf           2.0
-         :type         :julia
-         :julia-coeff0 (c/complex {:a -0.2 :b 0.9 :impl :plain})
-         :julia-coefff (c/complex {:a -0.1 :b 0.7 :impl :plain})}
-
-   ;Varies Julia fractal params in `a` only
-   :c6  {:x0           0.0
-         :y0           0.0
-         :xf           0.0
-         :yf           -0.0
-         :w0           2.0
-         :wf           2.0
-         :h0           2.0
-         :hf           2.0
-         :type         :julia
-         :julia-coeff0 (c/complex {:a -0.2 :b 0.7 :impl :plain})
-         :julia-coefff (c/complex {:a 0.2 :b 0.7 :impl :plain})}
-
-
-   ;Varies Julia fractal params in `b` only
-   :c7  {:x0           0.0
-         :y0           0.0
-         :xf           0.0
-         :yf           -0.0
-         :w0           2.0
-         :wf           2.0
-         :h0           2.0
-         :hf           2.0
-         :type         :julia
-         :julia-coeff0 (c/complex {:a -0.1 :b 0.7 :impl :plain})
-         :julia-coefff (c/complex {:a -0.1 :b -0.7 :impl :plain})}
-
-   ;All variations Julia
-   :c8  {:iter-scale   2.0
-         :x0           0.0
-         :y0           0.0
-         :xf           0.0
-         :yf           0.0
-         :w0           4.0
-         :wf           4.0
-         :h0           4.0
-         :hf           4.0
-         :type         :julia
-         :julia-coeff0 (c/complex {:a -0.1 :b 1.0 :impl :plain})
-         :julia-coefff (c/complex {:a -0.1 :b 0.6 :impl :plain})}
 
    ;Multidomain
    :c9  {:type :julia
@@ -318,33 +267,7 @@
                  :julia-coeff0 (c/complex {:a -0.1 :b 0.6 :impl :plain})
                  :julia-coefff (c/complex {:a -0.1 :b 1.0 :impl :plain})}]}
 
-   :c10 {:type :julia
-         :multidom
-               [{:iter-scale   1.0
-                 :x0           0.0
-                 :y0           0.0
-                 :xf           0.0
-                 :yf           0.0
-                 :w0           4.0
-                 :wf           4.0
-                 :h0           4.0
-                 :hf           4.0
-                 :type         :julia
-                 :julia-coeff0 (c/complex {:a -0.1 :b -1.0 :impl :plain})
-                 :julia-coefff (c/complex {:a -0.1 :b 1.0 :impl :plain})}
-                {:iter-scale   1.0
-                 :x0           0.0
-                 :y0           0.0
-                 :xf           0.0
-                 :yf           0.0
-                 :w0           4.0
-                 :wf           4.0
-                 :h0           4.0
-                 :hf           4.0
-                 :type         :julia
-                 :julia-coeff0 (c/complex {:a -0.1 :b 1.0 :impl :plain})
-                 :julia-coefff (c/complex {:a -0.1 :b -1.0 :impl :plain})}]}
-
+   ;Good points
    :c11 {:type :julia
          :multidom
                [{:iter-scale   2.0
@@ -406,7 +329,7 @@
    :c13 {:type     :julia
          :palette  :rainbow2
          :multidom (->
-                     [{:iter-scale   10.0
+                     [{:iter-scale   15.0
                        :x0           0.0
                        :y0           0.0
                        :xf           0.0
@@ -446,7 +369,7 @@
             :img-h        1200
             :img-scale-fn identity}
    :render {:test-size    20000000
-            :views        3
+            :views        20
             :img-w        1600
             :img-h        1600
             :img-scale-fn identity}
@@ -456,10 +379,38 @@
             :img-h        2400
             :img-scale-fn identity}})
 
+
+(defn intensities-random-sample [xrange yrange iters julia-coeff render-size test-size]
+  (->>
+    (range test-size)
+    (pmap
+      (fn [i]
+        [i
+         (fspec/i->x (rand-int render-size) render-size xrange)
+         (fspec/i->x (rand-int render-size) render-size yrange)]))
+    (filter
+      (fn [[i x y]]
+        (> 2.0 (mag (c/complex {:a x :b y})))))
+    (pmap
+      (fn [[i x y]]
+        (when (= 0 (rem i (int (/ test-size 20))))
+          (println (Date.) " Computing " (int (* 100 (/ i test-size)))
+                   "% complete "))
+        [x y
+         (f/compute-iters-julia
+           x
+           y
+           :plain
+           iters
+           julia-coeff)]))
+    (filter #(not (zero? (nth % 2))))))
+
 (defn run []
-  (let [dir          (str "gen-img-test/test-" (System/currentTimeMillis))
-        fconfig      :c13
-        rconfig      :slow
+  (let [fconfig      :c13
+        rconfig      :insane
+        dir          (str
+                       "gen-img-test/test-" (name fconfig) "-"
+                       (name rconfig) "-" (System/currentTimeMillis))
         {:keys [type multidom palette]
          :or   {palette :green-red}
          :as   fconfig-data} (fractal-config fconfig)
@@ -489,33 +440,25 @@
       (reset! fspec/X-RANGE* xrange)
       (reset! fspec/Y-RANGE* yrange)
       (reset! fspec/MAX-CONV-ITERS* iters)
-      (let [image (BufferedImage.
-                    img-w
-                    img-h
-                    BufferedImage/TYPE_INT_ARGB)
-            its   (pgen-spec
-                    (s/gen
-                      frac-spec)
-                    test-size)
-            imgf  (str dir (format "/img-%04d" @imgc*) ".png")]
-        (draw-intensities-w-raster its image img-w img-h palette)
-        ;(imgz/show image)
+      (let [image       (BufferedImage.
+                          img-w
+                          img-h
+                          BufferedImage/TYPE_INT_ARGB)
+            intensities (intensities-random-sample
+                          xrange yrange iters julia-coeff 1000000 test-size)
+            ;intensities (intensities-gen-spec
+            ;              (s/gen frac-spec)
+            ;              test-size)
+            imgf        (str dir (format "/img-%04d" @imgc*) ".png")]
+        (draw-intensities-w-raster intensities image img-w img-h palette)
         (imgz/save (img-scale-fn image) imgf)
         (println "Wrote: " imgf)
-        (when
-          (or
-            (= :insane rconfig)
-            (= :render rconfig)
-            (= :slow rconfig))
-          #_(animate-results-gif (str dir "/*.png")
-                                 (str dir "/fractal-part-" @imgc* ".gif"))
-          (animate-results-ffmpeg dir
-                                  (str dir "/fractal-part-" @imgc* ".mp4")))
+        (when (or (= :insane rconfig)
+                  (= :render rconfig)
+                  (= :slow rconfig))
+          (animate-results-ffmpeg dir (str dir "/fractal-part-" @imgc* ".mp4")))
         (swap! imgc* inc)))
-    #_(animate-results-gif (str dir "/*.png")
-                           (str dir "/fractal-all.gif"))
-    (animate-results-ffmpeg dir
-                            (str dir "/fractal-all.mp4"))))
+    (animate-results-ffmpeg dir (str dir "/fractal-all.mp4"))))
 (try
   (run)
   (catch Exception e

@@ -33,6 +33,7 @@
 (defn palette-rainbox2 [iters max-iters]
   (let [pct-intensity (/ iters max-iters)
         [r g b] (cond
+                  (zero? pct-intensity) [0 0 255]
                   (<= 0.0 pct-intensity 0.01) [3 146 207]
                   (<= 0.01 pct-intensity 0.02) [10 149 200]
                   (<= 0.02 pct-intensity 0.03) [15 152 190]

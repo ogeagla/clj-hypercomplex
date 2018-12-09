@@ -289,7 +289,7 @@
     (when (valid-idx? this idx)
       (let [half-order (/ (:order this)
                           2)
-            new-idx    (mod idx half-order)
+            new-idx    (rem idx half-order)
             retval     (if (< idx half-order)
                          (get-idx (:a this) new-idx)
                          (get-idx (:b this) new-idx))]
@@ -299,7 +299,7 @@
     (when (valid-idx? this idx)
       (let [half-order (/ (:order this)
                           2)
-            new-idx    (mod idx half-order)]
+            new-idx    (rem idx half-order)]
         (if (< idx half-order)
           (update-in this [:a] set-idx new-idx new-val)
           (update-in this [:b] set-idx new-idx new-val)))))

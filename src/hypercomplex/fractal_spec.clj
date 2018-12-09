@@ -7,6 +7,9 @@
              [complex quaternion octonion sedenion
               pathion n-hypercomplex power-of?]]))
 
+
+;;TODO major perf issues doing derefs millions of times by different threads...
+
 (set! *unchecked-math* true)
 (set! *warn-on-reflection* true)
 
@@ -30,7 +33,7 @@
         (= n ##NaN)))))
 
 
-(defn- i->x [i imax range]
+(defn i->x [i imax range]
   (let [dr (apply - (reverse range))
         ri (/ i imax)]
     (+
