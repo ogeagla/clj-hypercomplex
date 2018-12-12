@@ -345,10 +345,10 @@
                                        {:a -0.01 :b -0.72 :impl :plain})}]
                      (multidom-with
                        :fractal-coeff-change
-                       (c/complex {:a -0.05 :b -0.66 :impl :plain}))
+                       (c/complex {:a -0.05 :b -0.62 :impl :plain}))
                      (multidom-with
                        :fractal-coeff-change
-                       (c/complex {:a -0.11 :b -0.71 :impl :plain}))
+                       (c/complex {:a -0.1 :b -0.69 :impl :plain}))
                      )}})
 
 
@@ -364,7 +364,7 @@
             :img-h        400
             :img-scale-fn #(imgz/scale % 3)}
    :slow   {:test-size    5000000
-            :views        20
+            :views        50
             :img-w        1200
             :img-h        1200
             :img-scale-fn identity}
@@ -380,7 +380,8 @@
             :img-scale-fn identity}})
 
 
-(defn intensities-random-sample [xrange yrange iters julia-coeff render-size test-size]
+(defn intensities-random-sample
+  [xrange yrange iters julia-coeff render-size test-size]
   (->>
     (range test-size)
     (pmap
@@ -393,7 +394,7 @@
         (> 2.0 (mag (c/complex {:a x :b y})))))
     (pmap
       (fn [[i x y]]
-        (when (= 0 (rem i (int (/ test-size 20))))
+        (when (= 0 (rem i (int (/ test-size 10))))
           (println (Date.) " Computing " (int (* 100 (/ i test-size)))
                    "% complete "))
         [x y
@@ -408,7 +409,7 @@
 (defn run []
   (let [gen-config   :rand-sample
         fconfig      :c13
-        rconfig      :insane
+        rconfig      :slow
         dir          (str
                        "gen-img-test/test-" (name fconfig) "-"
                        (name rconfig) "-" (System/currentTimeMillis))
