@@ -29,7 +29,7 @@
             (times z z))
           (inc iterations))))))
 
-(defn compute-iters-julia
+(defn- compute-iters-julia-f
   "Computer iterations of equation:
   z_n+1 = z_n^2 + d, where z_0 = p + q*i,
   and d is the provided julia coefficient.
@@ -51,6 +51,8 @@
             julia-coeff
             (times z z))
           (inc iterations))))))
+
+(def compute-iters-julia (memoize compute-iters-julia-f))
 
 (defn compute-iters-quat-julia
   [p q impl max-iterations julia-coeff]
