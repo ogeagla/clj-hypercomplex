@@ -7,7 +7,7 @@
             [clojure.spec.gen.alpha :as gen]
             [hypercomplex.cayley-dickson-construction :as c]
             [hypercomplex.alpha.fractal-spec :as fspec]
-            [hypercomplex.alpha.fractal-colors :as fc]
+            [hypercomplex.alpha.fractal-pixels :as fp]
             [hypercomplex.core :refer :all]
             [me.raynes.fs :as fs]
             [hypercomplex.alpha.fractal-iters :as f])
@@ -34,62 +34,6 @@
         (str imgdir "/img-%04d.png") "-c:v" "libx264" "-r" "30"
         output)))
 
-(defn- calc-pixel-color-argb
-  [iterations max-iterations palette]
-  (case palette
-    :green-red (fc/palette-green-to-red iterations max-iterations)
-    :rainbow (fc/palette-rainbox iterations max-iterations)
-    :rainbow2 (fc/palette-rainbox2 iterations max-iterations)))
-
-(defn intensity-coord->img-coord
-  [intensity-coord img-dim-size intensity-domain flip?]
-  (let [c (->>
-            intensity-domain
-            (reverse)
-            (apply -)
-            (/ img-dim-size)
-            (* (- intensity-coord (first intensity-domain)))
-            (int)
-            (max 0)
-            (min (dec img-dim-size)))]
-    (if flip?
-      (- (dec img-dim-size) c)
-      c)))
-
-(defn img-intensities
-  [intensities surface-width surface-height palette]
-  (pmap
-    (fn [[x y iters]]
-      (let [i       (intensity-coord->img-coord
-                      x surface-width @fspec/X-RANGE* false)
-            j       (intensity-coord->img-coord
-                      y surface-height @fspec/Y-RANGE* true)
-            ^ints c (calc-pixel-color-argb
-                      iters @fspec/MAX-CONV-ITERS* palette)]
-        [i j c]))
-    intensities))
-
-(defn- draw-intensities-w-raster
-  [intensities ^BufferedImage image surface-width surface-height palette]
-  (let [^WritableRaster raster (.getRaster image)
-        ^Graphics g            (.getGraphics image)
-        img-vals               (set
-                                 (img-intensities
-                                   intensities surface-width
-                                   surface-height palette))
-        x-zero                 (intensity-coord->img-coord
-                                 0 surface-width @fspec/X-RANGE* false)
-        y-zero                 (intensity-coord->img-coord
-                                 0 surface-height @fspec/Y-RANGE* true)]
-    (doseq [[^int i ^int j ^ints argb] img-vals]
-      (.setPixel raster i j argb))
-    (.setColor g Color/BLACK)
-    (.drawLine g
-               0 y-zero
-               surface-width y-zero)
-    (.drawLine g
-               x-zero 0
-               x-zero surface-height)))
 
 
 (defn intensities-gen-spec [generator quant]
@@ -407,28 +351,31 @@
     (filter #(not (zero? (nth % 2))))))
 
 (defn run []
-  (let [gen-config   :rand-sample
-        fconfig      :c13
-        rconfig      :slow
-        dir          (str
-                       "gen-img-test/test-" (name fconfig) "-"
-                       (name rconfig) "-" (System/currentTimeMillis))
+  (let [render-mode :pixels
+        gen-mode    :rand-sample
+        fconfig       :c13
+        rconfig       :fast
+        dir           (str
+                        "gen-img-test/test-"
+                        (System/currentTimeMillis) "-"
+                        (name fconfig) "-"
+                        (name rconfig))
         {:keys [type multidom palette]
          :or   {palette :green-red}
          :as   fconfig-data} (fractal-config fconfig)
         {:keys
          [test-size views img-w
           img-h img-scale-fn]} (render-config rconfig)
-        fconfig-data (assoc fconfig-data :views views)
-        domans       (if multidom
-                       (combine-domains multidom views)
-                       (domains fconfig-data))
-        frac-spec    (case type
-                       :julia ::fspec/interesting-intensity-plain-julia
-                       ;TODO mandel specs
-                       ;:mandel :TODO
-                       )
-        imgc*        (atom 1)]
+        fconfig-data  (assoc fconfig-data :views views)
+        domans        (if multidom
+                        (combine-domains multidom views)
+                        (domains fconfig-data))
+        frac-spec     (case type
+                        :julia ::fspec/interesting-intensity-plain-julia
+                        ;TODO mandel specs
+                        ;:mandel :TODO
+                        )
+        imgc*         (atom 1)]
     (if-not (fs/exists? dir)
       (fs/mkdir dir))
     (doseq [[xrange yrange iters julia-coeff] domans]
@@ -442,7 +389,7 @@
                           img-w
                           img-h
                           BufferedImage/TYPE_INT_ARGB)
-            intensities (case gen-config
+            intensities (case gen-mode
                           :spec-sample (intensities-gen-spec
                                          (s/gen frac-spec)
                                          test-size)
@@ -451,15 +398,21 @@
                                          julia-coeff 1000000 test-size))
 
             imgf        (str dir (format "/img-%04d" @imgc*) ".png")]
-        (draw-intensities-w-raster intensities image img-w img-h palette)
-        (imgz/save (img-scale-fn image) imgf)
-        (println "Wrote: " imgf)
-        (when (or (= :insane rconfig)
-                  (= :render rconfig)
-                  (= :slow rconfig))
-          (animate-results-ffmpeg dir (str dir "/fractal-part-" @imgc* ".mp4")))
+        (case render-mode
+          :voxels (do (throw (RuntimeException. "NOT IMPLD")))
+          :pixels (do (fp/draw-intensities-w-raster intensities image img-w img-h palette)
+                      (imgz/save (img-scale-fn image) imgf)
+                      (println "Wrote: " imgf)
+                      (when (or (= :insane rconfig)
+                                (= :render rconfig)
+                                (= :slow rconfig))
+                        (animate-results-ffmpeg dir (str dir "/fractal-part-" @imgc* ".mp4")))
+                      ))
         (swap! imgc* inc)))
     (animate-results-ffmpeg dir (str dir "/fractal-all.mp4"))))
 
 (comment
-  (run))
+  (try
+    (run)
+    (catch Exception e
+      (clojure.pprint/pprint e))))

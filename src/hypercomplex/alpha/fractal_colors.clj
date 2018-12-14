@@ -30,7 +30,35 @@
                   (map int))]
     (int-array [r g b 255])))
 
+(defn blend [w1 [r1 g1 b1] w2 [r2 g2 b2]]
+  [
+   (int (/ (+ (* w1 r1) (* w2 r2)) (+ w1 w2)))
+   (int (/ (+ (* w1 g1) (* w2 g2)) (+ w1 w2)))
+   (int (/ (+ (* w1 b1) (* w2 b2)) (+ w1 w2)))
+   ])
+
 (defn palette-rainbox2 [iters max-iters]
+
+  (let [tenth (/ max-iters 10.0)
+        [base sub-pct] (cond
+                         (< iters tenth) [[3 146 207] (/ iters tenth)]
+                         (< iters (* 2 tenth)) [[55 146 170] (/ iters (* 2 tenth))]
+                         (< iters (* 3 tenth)) [[75 155 130] (/ iters (* 3 tenth))]
+                         (< iters (* 4 tenth)) [[153 204 94] (/ iters (* 4 tenth))]
+                         (< iters (* 5 tenth)) [[203 222 123] (/ iters (* 5 tenth))]
+                         (< iters (* 6 tenth)) [[253 244 152] (/ iters (* 6 tenth))]
+                         (< iters (* 7 tenth)) [[250 201 101] (/ iters (* 7 tenth))]
+                         (< iters (* 8 tenth)) [[243 119 54] (/ iters (* 8 tenth))]
+                         (< iters (* 9 tenth)) [[240 64 51] (/ iters (* 9 tenth))]
+                         (<= iters (* 10 tenth)) [[235 3 44] (/ iters max-iters)])
+        [r g b] (blend
+                  sub-pct
+                  base
+                  (- 1.0 sub-pct)
+                  [100 100 100])]
+    (int-array [r g b 255])))
+
+(defn palette-rainbox3 [iters max-iters]
   (let [pct-intensity (/ iters max-iters)
         [r g b] (cond
                   (zero? pct-intensity) [0 0 255]
@@ -55,7 +83,6 @@
                   (<= 0.18 pct-intensity 0.19) [130 198 90]
                   (<= 0.19 pct-intensity 0.2) [143 200 87]
 
-                  (<= 0.19 pct-intensity 0.2) [148 202 90]
                   (<= 0.20 pct-intensity 0.21) [153 204 94]
                   (<= 0.21 pct-intensity 0.22) [158 206 97]
                   (<= 0.22 pct-intensity 0.23) [162 208 102]
@@ -76,7 +103,6 @@
                   (<= 0.37 pct-intensity 0.38) [235 240 148]
                   (<= 0.38 pct-intensity 0.39) [241 241 150]
                   (<= 0.39 pct-intensity 0.4) [245 242 151]
-
 
                   (<= 0.4 pct-intensity 0.41) [253 244 152]
 

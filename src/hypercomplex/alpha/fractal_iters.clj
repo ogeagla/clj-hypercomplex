@@ -51,3 +51,21 @@
             julia-coeff
             (times z z))
           (inc iterations))))))
+
+(defn compute-iters-quat-julia
+  [p q impl max-iterations julia-coeff]
+  (let [c           (quaternion {:a p :b q :c 0.0 :d 0.0 :impl impl})
+        julia-coeff julia-coeff]
+    (loop [z          c
+           iterations 0]
+      ;(println "hc Mandelbrot z: " z)
+      (if (or (> (mag z) 2.0)
+              (> iterations max-iterations))
+        (if (= 0 iterations)
+          0
+          (dec iterations))
+        (recur
+          (plus
+            julia-coeff
+            (times z z))
+          (inc iterations))))))
