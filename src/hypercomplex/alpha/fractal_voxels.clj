@@ -15,37 +15,36 @@
 (defn- i->x [i imin xmin s]
   (+ xmin (* s (- i imin))))
 
-(defn ppmap
-  "Partitioned pmap, for grouping map ops together to make parallel
-  overhead worthwhile"
-  [grain-size f & colls]
-  (let [c*    (atom 0)
-        parts (int (Math/ceil (/ (count (apply concat colls)) grain-size)))]
-    (apply concat
-           (apply pmap
-                  (fn [& pgroups]
-                    (println "Doing part: "
-                             (swap! c* inc) " / "
-                             parts " " (Date.))
-                    (doall (apply map f pgroups)))
-                  (map (partial partition-all grain-size) colls)))))
-
-(defn iters-parallel-part
+(defn iters-cached
   [cartesian-domain3 imin xmin ymin zmin sx sy sz julia-a julia-b max-iters]
-  (doall
-    (ppmap
-      200000
-      (fn [[x y z]]
-        (let [xx (i->x x imin xmin sx)
-              yy (i->x y imin ymin sy)
-              zz (i->x z imin zmin sz)
-              ja (or julia-a zz)
-              jb (or julia-b zz)]
-          [[x y z] (fi/compute-iters-julia
-                     xx yy :plain max-iters
-                     (c/complex
-                       {:a ja :b jb :impl :plain}))]))
-      cartesian-domain3)))
+  (->
+    (doall
+      (fi/ppmap
+        "Computing iter keys "
+        200000
+        (fn [[x y z]]
+          (let [xx (i->x x imin xmin sx)
+                yy (i->x y imin ymin sy)
+                zz (i->x z imin zmin sz)
+                ja (or julia-a zz)
+                jb (or julia-b zz)]
+            {:itype :julia-2
+             :p     xx
+             :q     yy
+             :x     x
+             :y     y
+             :z     z
+             :imax  max-iters
+             :coeff (c/complex
+                      {:a ja :b jb :impl :plain})
+             :impl  :plain}
+
+            #_[[x y z] (fi/compute-iters-julia
+                         xx yy :plain max-iters
+                         (c/complex
+                           {:a ja :b jb :impl :plain}))]))
+        cartesian-domain3))
+    (fi/cached-compute-iters "cache/cache-01.nippy")))
 
 (defn iter-voxels
   [{:keys [iso-val delta-i irng
@@ -70,7 +69,7 @@
         iters             (time
                             (into
                               {}
-                              (iters-parallel-part
+                              (iters-cached
                                 cartesian-domain3 imin xmin ymin zmin
                                 sx sy sz julia-a julia-b max-iters)))
         _                 (println "Gathering voxels")
@@ -81,9 +80,7 @@
                                 (vec3 x y z))
                               (svo/apply-voxels
                                 svo/set-at (svo/voxeltree 32 delta-i))))]
-
     (println "Writing " fname)
-
     (time
       (with-open [o (io/output-stream fname)]
         (mio/write-stl
@@ -187,4 +184,19 @@
    :max-iters   20
    :iter-thresh 19})
 
-(iter-voxels conf-8)
+(def conf-9
+  {:fname       "gen-voxels-test/fractal-9e.stl"
+   :iso-val     0.5
+   :delta-i     (double 1/8)
+   :irng        [1 31]
+   :xrng        [0.155 0.275]
+   :yrng        [0.555 0.675]
+   :zrng        [-0.05 0.2]
+   :julia-b     -0.85
+   :max-iters   20
+   :iter-thresh 19})
+
+(try
+  (iter-voxels conf-9)
+  (catch Exception e
+    (clojure.pprint/pprint e)))
