@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
 
-## [0.0.3] - 2019-05-09
+## [0.0.4] - 2019-05-09
 ### Changed
 - No API changes, only performance, internal style, and dependency improvements.
 ## [0.0.3] - 2018-10-29
