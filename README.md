@@ -7,7 +7,7 @@
 [![Clojars Project](https://img.shields.io/clojars/v/hypercomplex.svg)](https://clojars.org/hypercomplex)
 
 ```clojure
-[hypercomplex "0.0.3"]
+[hypercomplex "0.0.4"]
 ```
 
 A hypercomplex number library written in Clojure.
