@@ -104,11 +104,20 @@
                    :julia-2 (compute-iters-julia-f p q impl imax coeff))]
     [iter-key iter-val]))
 
+(defn preload [cfile]
+  (future
+    (if (fs/exists? cfile)
+      (do (println "Preloading cache")
+          (nippy/thaw-from-file cfile))
+      {})))
+
 (defn cached-compute-iters [iter-keys cfile]
   (println "Loading cache " cfile)
-  (let [cache              (if (fs/exists? cfile)
-                             (nippy/thaw-from-file cfile)
-                             {})
+  (let [cache              (if (future? cfile)
+                             @cfile
+                             (if (fs/exists? cfile)
+                               (nippy/thaw-from-file cfile)
+                               {}))
         cache-keys-and-old (into
                              {}
                              (ppmap
@@ -119,21 +128,26 @@
                                iter-keys))
         cache-keys         (keys cache-keys-and-old)
         cache-hits         (select-keys cache cache-keys)
-        _                  (println "Cache hits: " (count cache-hits) " / " (count cache-keys)
+        _                  (println "Cache hits: " (count cache-hits)
+                                    " / " (count cache-keys)
                                     " , cache size: " (count cache))
         found-keys         (keys cache-hits)
-        to-xompute-keys    (set/difference (set cache-keys) (set found-keys))
+        to-xompute-keys    (set/difference
+                             (set cache-keys)
+                             (set found-keys))
         _                  (println "Computing: " (count to-xompute-keys))
         computed           (into {}
                                  (ppmap
                                    "Computing iters "
                                    200000
                                    iter-key->iters
-                                   to-xompute-keys))]
+                                   to-xompute-keys))
+        pfuture            (future
+                             (when-not (empty? to-xompute-keys)
+                               (println "Persisting cache ")
+                               (nippy/freeze-to-file cfile (merge cache computed))))]
 
-    (when-not (empty? to-xompute-keys)
-      (println "Persisting cache")
-      (nippy/freeze-to-file cfile (merge cache computed)))
+
     (let [wo-xyz (merge cache-hits computed)
           w-xyz  (into
                    {}
@@ -145,5 +159,5 @@
                          [wxyz
                           vv]))
                      wo-xyz))]
-      w-xyz))
+      [pfuture w-xyz]))
   )

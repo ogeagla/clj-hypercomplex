@@ -16,7 +16,7 @@
   (+ xmin (* s (- i imin))))
 
 (defn iters-cached
-  [cartesian-domain3 imin xmin ymin zmin sx sy sz julia-a julia-b max-iters]
+  [cfuture cartesian-domain3 imin xmin ymin zmin sx sy sz julia-a julia-b max-iters]
   (->
     (doall
       (fi/ppmap
@@ -37,14 +37,9 @@
              :imax  max-iters
              :coeff (c/complex
                       {:a ja :b jb :impl :plain})
-             :impl  :plain}
-
-            #_[[x y z] (fi/compute-iters-julia
-                         xx yy :plain max-iters
-                         (c/complex
-                           {:a ja :b jb :impl :plain}))]))
+             :impl  :plain}))
         cartesian-domain3))
-    (fi/cached-compute-iters "cache/cache-01.nippy")))
+    (fi/cached-compute-iters cfuture)))
 
 (defn iter-voxels
   [{:keys [iso-val delta-i irng
@@ -53,7 +48,9 @@
 
   (println "Computing cells " fname)
 
-  (let [r                 (range (first irng) (second irng) delta-i)
+  (let [cfuture           (fi/preload "cache/cache-01.nippy")
+        r                 (range
+                            (first irng) (second irng) delta-i)
         cartesian-domain3 (time
                             (doall
                               (for [x r y r z r]
@@ -66,26 +63,30 @@
         sy                (/ (- ymax ymin) (- imax imin))
         sz                (/ (- zmax zmin) (- imax imin))
         _                 (println "Computing iters")
+        [pfuture iter-res] (iters-cached
+                             cfuture cartesian-domain3 imin xmin ymin zmin
+                             sx sy sz julia-a julia-b max-iters)
         iters             (time
                             (into
                               {}
-                              (iters-cached
-                                cartesian-domain3 imin xmin ymin zmin
-                                sx sy sz julia-a julia-b max-iters)))
+                              iter-res))
         _                 (println "Gathering voxels")
         v                 (time
                             (->>
                               (for [[x y z] cartesian-domain3
-                                    :when (< iter-thresh (get iters [x y z]))]
+                                    :when (< iter-thresh
+                                             (get iters [x y z]))]
                                 (vec3 x y z))
                               (svo/apply-voxels
-                                svo/set-at (svo/voxeltree 32 delta-i))))]
+                                svo/set-at
+                                (svo/voxeltree 32 delta-i))))]
     (println "Writing " fname)
     (time
       (with-open [o (io/output-stream fname)]
         (mio/write-stl
           (mio/wrapped-output-stream o)
           (g/tessellate (iso/surface-mesh v 10 iso-val)))))
+    @pfuture
     (println "Done")))
 
 (def conf-1
@@ -185,7 +186,7 @@
    :iter-thresh 19})
 
 (def conf-9
-  {:fname       "gen-voxels-test/fractal-9e.stl"
+  {:fname       "gen-voxels-test/fractal-9.stl"
    :iso-val     0.5
    :delta-i     (double 1/8)
    :irng        [1 31]
@@ -196,7 +197,19 @@
    :max-iters   20
    :iter-thresh 19})
 
+(def conf-10
+  {:fname       "gen-voxels-test/fractal-10.stl"
+   :iso-val     0.5
+   :delta-i     (double 1/4)
+   :irng        [1 31]
+   :xrng        [0.125 0.3]
+   :yrng        [0.525 0.7]
+   :zrng        [-0.65 -0.75]
+   :julia-a     -0.004
+   :max-iters   20
+   :iter-thresh 19})
+
 (try
-  (iter-voxels conf-9)
+  (iter-voxels conf-10)
   (catch Exception e
     (clojure.pprint/pprint e)))
