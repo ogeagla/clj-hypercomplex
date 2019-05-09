@@ -131,11 +131,11 @@
            (mag (quaternion {:a 1 :b 1 :c 1 :d 1})))))
 
   (testing "Norm"
-    (is (= 2
+    (is (= 2.0
            (norm (complex {:a 1 :b 1}))))
-    (is (= 4
+    (is (= 4.0
            (norm (quaternion {:a 1 :b 1 :c 1 :d 1}))))
-    (is (= 32
+    (is (= 32.0
            (norm (pathion {:a 1 :b 1 :c 1 :d 1 :e 1 :f 1 :g 1 :h 1
                            :i 1 :j 1 :k 1 :l 1 :m 1 :n 1 :o 1 :p 1
                            :q 1 :r 1 :s 1 :t 1 :u 1 :v 1 :w 1 :x 1

@@ -84,10 +84,19 @@
   coefficient vector does not contain a power-of-2
   amount of elements, an Exception is thrown."
   [coeffs impl]
-  (if
+  (if-not
     (and
       (power-of? (count coeffs) 2)
       (< 1 (count coeffs)))
+    (let [err-str (str
+                    "Fn n-hypercomplex requires coefficients count
+                    to be a power of 2, and GT 1. Provided: "
+                    (vec coeffs))]
+      (println
+        err-str)
+      (throw
+        (Exception.
+          err-str)))
     (if (= 2 (count coeffs))
       (complex {:a (nth coeffs 0) :b (nth coeffs 1) :impl impl})
       (let [[first-half-coeffs
@@ -96,12 +105,4 @@
                                    coeffs)]
         (init-construction
           (n-hypercomplex first-half-coeffs impl)
-          (n-hypercomplex second-half-coeffs impl))))
-    (let [err-str (str
-                    "n-complex requires coefficients count to be a power of 2. Provided: "
-                    (vec coeffs))]
-      (println
-        err-str)
-      (throw
-        (Exception.
-          err-str)))))
+          (n-hypercomplex second-half-coeffs impl))))))
