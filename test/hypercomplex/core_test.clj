@@ -1,9 +1,11 @@
 (ns hypercomplex.core-test
-  (:require [clojure.test :refer :all]
-            [hypercomplex.core :refer :all]
-            [hypercomplex.cayley-dickson-construction :refer
-             [complex quaternion octonion sedenion pathion]]
-            [clojure.pprint :refer :all]))
+  (:require
+    [clojure.pprint :refer :all]
+    [clojure.test :refer :all]
+    [hypercomplex.cayley-dickson-construction :refer
+     [complex quaternion octonion sedenion pathion]]
+    [hypercomplex.core :refer :all]))
+
 
 (defn dissoc-in
   "Dissociates an entry from a nested associative structure returning a new
@@ -19,11 +21,15 @@
       m)
     (dissoc m k)))
 
-(defn fuzzy= [tolerance x y]
+
+(defn fuzzy=
+  [tolerance x y]
   (let [diff (Math/abs (- x y))]
     (< diff tolerance)))
 
-(defn quatfuzzy= [tolerance q1 q2]
+
+(defn quatfuzzy=
+  [tolerance q1 q2]
   (and (fuzzy= tolerance
                (:a (:a q1))
                (:a (:a q2)))
@@ -37,6 +43,7 @@
                (:b (:b q1))
                (:b (:b q2)))))
 
+
 (defn quaternion-strip-objs
   "Remove Complex2 instances from quaternion,
   which breaks equality checking. Impl :plain
@@ -49,6 +56,7 @@
     (dissoc-in [:a :obj])
     (dissoc :obj)))
 
+
 (deftest quat-math
   (testing "Product of quaternions :apache"
     (is (= (quaternion-strip-objs
@@ -60,6 +68,7 @@
     (is (= (quaternion {:a 11 :b -30 :c 25 :d 26 :impl :plain})
            (times (quaternion {:a 1 :b -2 :c 3 :d 2 :impl :plain})
                   (quaternion {:a 11 :b -2 :c 0 :d -2 :impl :plain}))))))
+
 
 (deftest invalid-index
   (testing "Exception is thrown for :apache"
@@ -80,6 +89,7 @@
           (println "unreachable" c2-3))
         (catch Exception e
           (is (= :invalid-index-access (:type (ex-data e)))))))))
+
 
 (deftest cayley-dickson-constructions-test
   (testing "Rotation"
