@@ -1,18 +1,21 @@
 (ns hypercomplex.cayley-dickson-construction
-  (:require [hypercomplex.core :refer :all]))
+  (:require
+    [hypercomplex.core :refer :all]))
+
 
 (defn complex
   [{:keys
-        [a b
-         impl]
+    [a b
+     impl]
     :as params
     :or {impl :plain}}]
   (init-complex2 a b impl))
 
+
 (defn quaternion
   [{:keys
-        [a b c d
-         impl]
+    [a b c d
+     impl]
     :as params
     :or {impl :plain}}]
   (init-construction
@@ -21,10 +24,11 @@
     (complex
       {:a c :b d :impl impl})))
 
+
 (defn octonion
   [{:keys
-        [a b c d
-         e f g h impl]
+    [a b c d
+     e f g h impl]
     :as params
     :or {impl :plain}}]
   (init-construction
@@ -33,13 +37,14 @@
     (quaternion
       {:a e :b f :c g :d h :impl impl})))
 
+
 (defn sedenion
   [{:keys
-        [a b c d
-         e f g h
-         i j k l
-         m n o p
-         impl]
+    [a b c d
+     e f g h
+     i j k l
+     m n o p
+     impl]
     :as params
     :or {impl :plain}}]
   (init-construction
@@ -48,13 +53,14 @@
     (octonion
       {:a i :b j :c k :d l :e m :f n :g o :h p :impl impl})))
 
+
 (defn pathion
   [{:keys
-        [a b c d e f g h
-         i j k l m n o p
-         q r s t u v w x
-         y z aa bb cc dd ee ff
-         impl]
+    [a b c d e f g h
+     i j k l m n o p
+     q r s t u v w x
+     y z aa bb cc dd ee ff
+     impl]
     :as params
     :or {impl :plain}}]
   (init-construction
@@ -67,7 +73,9 @@
        :i    y :j z :k aa :l bb :m cc :n dd :o ee :p ff
        :impl impl})))
 
-(defn power-of? [number base]
+
+(defn power-of?
+  [number base]
   (or
     (= 1 number)
     (= 1.0 number)
@@ -77,6 +85,7 @@
       (zero?
         (- log-base-of-number
            (int log-base-of-number))))))
+
 
 (defn n-hypercomplex
   "Provide a power-of-2-sized vector of coefficients

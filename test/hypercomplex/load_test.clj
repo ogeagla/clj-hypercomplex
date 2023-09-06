@@ -1,18 +1,26 @@
 (ns hypercomplex.load-test
-  (:require [clojure.test :refer :all]
-            [hypercomplex.core :refer :all]
-            [hypercomplex.cayley-dickson-construction :refer
-             [complex quaternion octonion sedenion pathion]])
-  (:import (java.util Random)))
+  (:require
+    [clojure.test :refer :all]
+    [hypercomplex.cayley-dickson-construction :refer
+     [complex quaternion octonion sedenion pathion]]
+    [hypercomplex.core :refer :all])
+  (:import
+    (java.util
+      Random)))
 
-(defn rand-w-seed [seed]
+
+(defn rand-w-seed
+  [seed]
   (let [^Random r (Random.)]
     (.setSeed r seed)
     r))
 
+
 (def ^Random RANDOM (rand-w-seed 7845639217))
 
-(defn RANDOM-STRING [len]
+
+(defn RANDOM-STRING
+  [len]
   (->>
     #(char
        (+
@@ -22,6 +30,7 @@
     (take len)
     (apply str)))
 
+
 (defn RANDOM-FLOAT
   "Random float between -5000.0 and 5000.0"
   []
@@ -29,7 +38,9 @@
       (- 0.5)
       (* 10000.0)))
 
-(defn do-once [impl]
+
+(defn do-once
+  [impl]
 
   (rot (quaternion {:a (RANDOM-FLOAT) :b (RANDOM-FLOAT) :c (RANDOM-FLOAT) :d (RANDOM-FLOAT) :impl impl})
        (quaternion {:a (RANDOM-FLOAT) :b (RANDOM-FLOAT) :c (RANDOM-FLOAT) :d (RANDOM-FLOAT) :impl impl}))
@@ -84,6 +95,7 @@
       (octonion {:a (RANDOM-FLOAT) :b (RANDOM-FLOAT) :c (RANDOM-FLOAT) :d (RANDOM-FLOAT) :e (RANDOM-FLOAT) :f (RANDOM-FLOAT) :g (RANDOM-FLOAT) :h (RANDOM-FLOAT) :impl impl})
       (octonion {:a (RANDOM-FLOAT) :b (RANDOM-FLOAT) :c (RANDOM-FLOAT) :d (RANDOM-FLOAT) :e (RANDOM-FLOAT) :f (RANDOM-FLOAT) :g (RANDOM-FLOAT) :h (RANDOM-FLOAT) :impl impl}))
     (octonion {:a (RANDOM-FLOAT) :b (RANDOM-FLOAT) :c (RANDOM-FLOAT) :d (RANDOM-FLOAT) :e (RANDOM-FLOAT) :f (RANDOM-FLOAT) :g (RANDOM-FLOAT) :h (RANDOM-FLOAT) :impl impl})))
+
 
 (deftest load-test
   (testing "Load test plain impl"

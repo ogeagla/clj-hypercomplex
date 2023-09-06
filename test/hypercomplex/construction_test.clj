@@ -1,8 +1,10 @@
 (ns hypercomplex.construction-test
-  (:require [clojure.test :refer :all]
-            [hypercomplex.cayley-dickson-construction :as c]))
+  (:require
+    [clojure.test :refer :all]
+    [hypercomplex.cayley-dickson-construction :as c]))
 
-;TODO this might be the ugliest clojure test ever seen
+
+;; TODO this might be the ugliest clojure test ever seen
 
 (deftest power-of-test
   (testing "If powers of 2 work"
@@ -35,6 +37,7 @@
             po-7?
             false)))))
 
+
 (deftest n-degree-test
   (testing "Cannot create n-hypercomplex unless coeffs count is power of 2, and > 1"
     (let [coeffs-1 [0]
@@ -53,24 +56,24 @@
         (=
           (c/n-hypercomplex coeffs-4 :plain)
           #hypercomplex.core.Construction{:a
-                                                 #hypercomplex.core.Construction{:a
-                                                                                        #hypercomplex.core.Complex2{:a     0
-                                                                                                                    :b     1
-                                                                                                                    :order 2}
-                                                                                 :b
-                                                                                        #hypercomplex.core.Complex2{:a     2
-                                                                                                                    :b     3
-                                                                                                                    :order 2}
-                                                                                 :order 4}
+                                          #hypercomplex.core.Construction{:a
+                                                                          #hypercomplex.core.Complex2{:a     0
+                                                                                                      :b     1
+                                                                                                      :order 2}
+                                                                          :b
+                                                                          #hypercomplex.core.Complex2{:a     2
+                                                                                                      :b     3
+                                                                                                      :order 2}
+                                                                          :order 4}
                                           :b
-                                                 #hypercomplex.core.Construction{:a
-                                                                                        #hypercomplex.core.Complex2{:a     4
-                                                                                                                    :b     5
-                                                                                                                    :order 2}
-                                                                                 :b     #hypercomplex.core.Complex2{:a     6
-                                                                                                                    :b     7
-                                                                                                                    :order 2}
-                                                                                 :order 4}
+                                          #hypercomplex.core.Construction{:a
+                                                                          #hypercomplex.core.Complex2{:a     4
+                                                                                                      :b     5
+                                                                                                      :order 2}
+                                                                          :b     #hypercomplex.core.Complex2{:a     6
+                                                                                                             :b     7
+                                                                                                             :order 2}
+                                                                          :order 4}
                                           :order 8}))
       (is
         (=
@@ -79,5 +82,4 @@
       #_(is
           (=
             (c/n-hypercomplex (range 4096) :plain)
-            {:too :many}))
-      )))
+            {:too :many})))))
