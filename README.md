@@ -152,7 +152,7 @@ Credits to:
   - https://nakkaya.com/2009/09/29/fractals-in-clojure-mandelbrot-fractal/
   - https://github.com/clojure-numerics/image-matrix/blob/master/src/main/clojure/mikera/image_matrix/colours.clj (EPL License)
 
-Copyright © 2018 FIXME
+Copyright © 2018 Octavian Geagla
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
